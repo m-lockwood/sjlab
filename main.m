@@ -13,7 +13,7 @@ output_folder = 'C:\Users\megan\Documents\sjlab\flexible-navigation-task\Data An
 % get list of files containing session-level behavioural data for each mouse
 filelist_behaviour = dir(fullfile(input_folder, Animal_ID,'**', '*experimental-data.csv'));
 sessionlist_behaviour = arrayfun(@(x) extractBetween(x.folder, ...
-    strcat(Animal_ID, filesep), filesep),filelist_behaviour); %<-- find a cleaner way of adding this
+    strcat(Animal_ID, filesep), filesep),filelist_behaviour); %<-- find a cleaner way of adding this (perhaps add to trial summary)?
 
 % concatenate within-session data from all sessions for animal
 trial_data_mouse = table();
@@ -27,32 +27,25 @@ writetable(trial_data_mouse, fullfile(output_folder, strcat('trial_summary_', An
 
 %% summarise session-level information
 
-% get list of ephys metadata files for animal ID and corresponding session
-% folder
+% 1 behavioural data session summary
+session_summary_behaviour = get_session_summary_behaviour(trial_data_mouse);
+
+% 2 ephys data session summary
+    
+% 2.1 get list of ephys metadata files for animal ID and corresponding session
+    % folder
 filelist_ephys = dir(fullfile(input_folder, Animal_ID,'**', '*settings.xml'));
+% 2.2 summarise meta-data from every file in filelist_ephys
+session_summary_ephys = get_session_summary_ephys(filelist_ephys);
 
-% behavioural data session summary
-session_summary_behaviour = get_session_summary(trial_data_mouse);
-
-% ephys data session summary
-variableNames = {'session_folder', 'Shanks', 'Reference'};
-variableTypes = {'cell', 'cell', 'cell'};
-
-session_summary_ephys = table('Size', [length(filelist_ephys),length(variableNames)], ...
-    'VariableTypes', variableTypes, 'VariableNames',variableNames);
-
-for sessionNum = 1:length(filelist_ephys)
-    session_folder = extractBetween(filelist_ephys(sessionNum).folder, strcat(Animal_ID,filesep), filesep);
-    settings = xml2struct(fullfile(filelist_ephys(sessionNum).folder, filelist_ephys(sessionNum).name));
-    session_attributes = settings.SETTINGS.SIGNALCHAIN.PROCESSOR{1,1}.EDITOR.NP_PROBE.Attributes;
-    rowData = [session_folder, session_attributes.electrodeConfigurationPreset, session_attributes.referenceChannel];
-    session_summary_ephys(sessionNum,:) = rowData;
-end
-
+% 3 combine behaviour and ephys session summaries
 session_summary_behaviour.session_folder = sessionlist_behaviour;
-session_summary=outerjoin(session_summary_behaviour, session_summary_ephys, 'Keys', 'session_folder', 'MergeKeys',true);
+session_summary=outerjoin(session_summary_behaviour, session_summary_ephys, ...
+    'Keys', 'session_folder', 'MergeKeys',true);
 
-% save to local directory
-writetable(session_summary, fullfile(output_folder, strcat('session_summary_', Animal_ID, '.csv')));
+% 4 save to local directory
+writetable(session_summary, fullfile(output_folder, strcat('session_summary_', ...
+    Animal_ID, '.csv')));
 
-%% plot session summary
+%% plot session summary information
+
