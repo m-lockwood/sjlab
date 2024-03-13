@@ -62,8 +62,8 @@ ax1 = nexttile;
 ax2 = nexttile;
     hold on;
     title(ax2, 'Plot choice bias over sessions', 'FontSize',titleFontSize);
-    pl1 = plot_shaded_error_bar(x, session_summary.choice_bias, ...
-        session_summary.choice_bias_bpci, para.colour_choice, faceAlpha);
+    choice_bias = session_summary.choice_port_1./(session_summary.choice_port_0+session_summary.choice_port_1);
+    pl1 = plot_shaded_error_bar(x, choice_bias, 'LineWidth',2, 'Color', para.colour_choice);
     %pl2 = plot(x, session_summary.abortTrialRate, 'LineWidth',2, 'Color',para.colour_abortRate);
     yline(0.5, '--', "LineWidth",1);
     ylim(choice_ylims)

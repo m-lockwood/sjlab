@@ -18,13 +18,11 @@ function trial_data = get_trial_data(session_data_filepath)
     % Extract logical value for whether trial was correct
     trial_data.CorrectTrial = cellfun(@(x) strcmp(x(1:end-1),'RewardedNosepoke'), trial_data.TrialCompletionCode);
     trial_data.AbortTrial = cellfun(@(x) strcmp(x(1:end-2),'AbortedTrial'), trial_data.TrialCompletionCode);
-    
-    % Extract chosen port ID
-    trial_data.ChoicePort = cellfun(@(x) str2double(x(end)), trial_data.TrialCompletionCode);
-    trial_data.ChoicePort(trial_data.AbortTrial)=nan;
 
-    % Change trials for which port 2 was chosen to aborted trials
-    trial_data.AbortTrial(trial_data.ChoicePort==2)=1;
+    % Extract chosen port ID for all non-aborted trials
+    trial_data.ChoicePort = cellfun(@(x) str2double(x(end)), trial_data.TrialCompletionCode);
+    trial_data.AbortTrial(trial_data.ChoicePort==2)=1; % Flag trials for which port 2 as aborted trials
+    trial_data.ChoicePort(trial_data.AbortTrial)=nan; % Omit choice port for all aborted trials
 
     % Extract correct port ID
     CorrectPort = nan(height(trial_data),1);

@@ -19,9 +19,7 @@ function session_summary = get_session_summary_behaviour(trial_data_mouse)
     session_summary.accuracy_all_trials_bpci = get_bpci(session_summary.accuracy_all_trials, session_summary.numTrials);
     session_summary.accuracy_completed_trials = splitapply(@(x,y) sum(x)/sum(~y), trial_data_mouse.CorrectTrial, trial_data_mouse.AbortTrial, sessionIdx);
     session_summary.accuracy_completed_trials_bpci = get_bpci(session_summary.accuracy_completed_trials, session_summary.numTrialsCompleted);
-    session_summary.choice_port_0 = splitapply(@(x) sum(x==0)/sum(~isnan(x)), trial_data_mouse.ChoicePort, sessionIdx);
-    session_summary.choice_port_1 = splitapply(@(x) sum(x==1)/sum(~isnan(x)), trial_data_mouse.ChoicePort, sessionIdx);
-    session_summary.choice_port_2 = splitapply(@(x) sum(x==2)/sum(~isnan(x)), trial_data_mouse.ChoicePort, sessionIdx);
-    %session_summary.choice_port_1_bpci = get_bpci(session_summary.bias, session_summary.numTrials);
+    session_summary.choice_bias = splitapply(@(x) sum(x==1)/sum(~isnan(x)), trial_data_mouse.ChoicePort, sessionIdx);
+    session_summary.choice_bias_bpci = get_bpci(session_summary.choice_bias, session_summary.numTrialsCompleted);
 
 end
