@@ -1,4 +1,4 @@
-function session_summary_ephys = get_session_summary_ephys(filelist)
+function session_summary_ephys = get_session_summary_ephys(Animal_ID, filelist)
 
     variableNames = {'session_folder', 'Shanks', 'Reference'};
     variableTypes = {'cell', 'cell', 'cell'};

@@ -36,7 +36,7 @@ session_summary_behaviour = get_session_summary_behaviour(trial_data_mouse);
     % folder
 filelist_ephys = dir(fullfile(input_folder, Animal_ID,'**', '*settings.xml'));
 % 2.2 summarise meta-data from every file in filelist_ephys
-session_summary_ephys = get_session_summary_ephys(filelist_ephys);
+session_summary_ephys = get_session_summary_ephys(Animal_ID, filelist_ephys);
 
 % 3 combine behaviour and ephys session summaries
 session_summary_behaviour.session_folder = sessionlist_behaviour;

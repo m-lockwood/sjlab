@@ -23,6 +23,9 @@ function trial_data = get_trial_data(session_data_filepath)
     trial_data.ChoicePort = cellfun(@(x) str2double(x(end)), trial_data.TrialCompletionCode);
     trial_data.ChoicePort(trial_data.AbortTrial)=nan;
 
+    % Change trials for which port 2 was chosen to aborted trials
+    trial_data.AbortTrial(trial_data.ChoicePort==2)=1;
+
     % Extract correct port ID
     CorrectPort = nan(height(trial_data),1);
     CorrectPort(trial_data.AudioCueIdentity==10)=0;
