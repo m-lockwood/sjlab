@@ -1,4 +1,6 @@
 function trial_data = get_trial_data(session_data_filepath)
+    % gets trial summary data from '*Experimental-data.csv' output directly
+    % from Bonsai
 
     trial_data = readtable(session_data_filepath);
 

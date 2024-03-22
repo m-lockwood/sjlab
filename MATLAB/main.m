@@ -5,7 +5,7 @@ clear
 %% CONFIG
 
 para = CONFIG;
-Animal_ID = '99';
+Animal_ID = '98';
 
 %% write intermediate variables and save locally
 
@@ -16,29 +16,16 @@ sessionlist_behaviour = arrayfun(@(x) extractBetween(x.folder, ...
 
 % concatenate within-session data from all sessions for animal
 trial_data_mouse = table();
-
 for sessionNum=1:length(filelist_behaviour)
-
-    session_data_filepath = fullfile(filelist_behaviour(sessionNum).folder, ...
-            filelist_behaviour(sessionNum).name);
-    session_ID = get_session_ID(session_data_filepath);
-
-    % output folder for session intermediate variables
-    output_folder_session = fullfile(para.output_folder, 'intermediate_variables', ...
-            Animal_ID);
-
-    if isempty(dir(fullfile(output_folder_session, strcat('*', session_ID, '_trial_summary.csv'))))
-        trial_data_session = get_trial_data(session_data_filepath);
-            save_table(trial_data_session, output_folder_session, ...
-            strcat(Animal_ID, '_', session_ID, '_trial_summary.csv'));
-    else % if trial summary already exists
-        trial_data_session = readtable(fullfile(output_folder_session, ...
-            strcat(Animal_ID, '_', session_ID, '_trial_summary.csv')));
-    end
-
-    %concatenate across all sessions 
+    trial_data_session = get_trial_data(fullfile(filelist_behaviour(sessionNum).folder, ...
+        filelist_behaviour(sessionNum).name));
     trial_data_mouse = [trial_data_mouse;trial_data_session];
 end
+
+% save to local directory
+writetable(trial_data_mouse, fullfile(para.output_folder, 'intermediate_variables', ...
+    strcat('trial_summary_', Animal_ID, '.csv')));
+
 %% summarise session-level information
 
 % 1 behavioural data session summary
@@ -63,7 +50,7 @@ writetable(sessions_summary, fullfile(para.output_folder, 'intermediate_variable
 
 %% plot session summary information
 
-fig = plot_sessions_summary(para, sessions_summary);
+fig = plot_sessions_summary(para, sessions_summary_behaviour);
 output_folder = fullfile(para.output_folder, 'plot_performance_across_sessions');
 filename = strcat('plot_session_bias_accuracy_', Animal_ID);
 save_figure(fig, output_folder, filename);

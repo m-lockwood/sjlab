@@ -29,21 +29,27 @@ function fig = plot_sessions_summary(para, sessions_summary)
         x = x';
     end
 
-    
+    ephys_data_available = ~(sessions_summary.Shanks=="");
+
     %% plot accuracy of all non-aborted trials
     ax1 = nexttile;
         hold on;
         title(ax1, 'Plot performance over sessions', 'FontSize',titleFontSize)
         pl1 = plot_shaded_error_bar(x, sessions_summary.accuracy_completed_trials, ...
             sessions_summary.accuracy_completed_trials_bpci, para.colour_accuracy, faceAlpha);
+
+        pl3 = mark_condition(x,sessions_summary.accuracy_completed_trials, ...
+            ephys_data_available,para.colour_accuracy);
+
         pl2 = plot(x, sessions_summary.accuracy_all_trials, 'LineWidth', 2, 'Color', ...
             para.colour_accuracy, 'LineStyle','--');
         yline(0.5, '--', "LineWidth",1);
+        yline(0.7, ':', "LineWidth",1);
         ylim(accuracy_ylims)
         xlim([min(x) max(x)]);
         ylabel('Fraction of Correct Trials', "FontSize",titleFontSize);
-        legend([pl1 pl2], {'Fraction of Completed Trials', 'Fraction of All Trials'}, ...
-            'FontSize', titleFontSize, 'Location','southeast');
+        legend([pl1 pl2 pl3], {'Fraction of Completed Trials', 'Fraction of All Trials', ...
+            'Ephys Data Available'}, 'FontSize', titleFontSize, 'Location','southeast');
     
     %% plot choice bias on all non-aborted trials (for which choice was port 0 or port 1)
     
