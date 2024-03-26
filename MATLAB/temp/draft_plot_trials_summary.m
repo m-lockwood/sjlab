@@ -1,7 +1,7 @@
 clear
 
 para = CONFIG;
-Animal_ID = '101';
+Animal_ID = '99';
 
 % plot params
 titleFontSize=16;

@@ -11,11 +11,11 @@ function trial_data = get_trial_data(session_data_filepath)
 
     % extract animal ID from filename and add to session_data table
     Animal_ID = get_animal_ID(session_data_filepath);
-    trial_data.Animal_ID = repmat(Animal_ID, height(trial_data),1);
+    trial_data.Animal_ID = repmat(cellstr(Animal_ID), height(trial_data),1);
 
     % extract session ID from filename and add to session_data table
     Session_ID = get_session_ID(session_data_filepath);
-    trial_data.Session_ID = repmat(Session_ID, height(trial_data), 1);
+    trial_data.Session_ID = repmat(cellstr(Session_ID), height(trial_data), 1);
 
     % Extract logical value for whether trial was correct
     trial_data.CorrectTrial = cellfun(@(x) strcmp(x(1:end-1),'RewardedNosepoke'), trial_data.TrialCompletionCode);
