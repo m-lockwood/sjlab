@@ -4,7 +4,7 @@ clear
 
 %% CONFIG
 para = CONFIG;
-Animal_ID = '99';
+Animal_ID = '98';
 
 %% write intermediate variables and save locally
 
@@ -65,3 +65,27 @@ fig = plot_sessions_summary(para, sessions_summary);
 output_folder = fullfile(para.output_folder, 'plot_performance_across_sessions');
 filename = strcat('plot_session_bias_accuracy_', Animal_ID);
 save_figure(fig, output_folder, filename);
+
+%% plot trial summary information (within each session)
+
+filelist = dir(fullfile(para.output_folder, 'intermediate_variables', Animal_ID, '*trial_data.csv'));
+
+% loop through all session with local trial-level data saved
+for sessionNum=1:length(filelist)
+
+    % read trial-level information
+    trial_data_session = read_trial_data(fullfile(filelist(sessionNum).folder, filelist(sessionNum).name));
+    Session_ID = trial_data_session.Session_ID(1,:);
+    
+    % get output folder and filename for fig
+    output_folder = fullfile(para.output_folder, 'plot_performance_across_trials', Animal_ID);
+    filename = strcat('plot_trial_bias_accuracy_', Animal_ID, '_', Session_ID);
+
+    if ~isfile(fullfile(output_folder, strcat(filename, '.png')))
+        fig = plot_trials_summary(para, trial_data_session);
+        save_figure(fig, output_folder, filename);
+        close
+    else
+        disp(strcat("Skipping ", Session_ID, " session plot as it already exists."))
+    end
+end

@@ -1,34 +1,19 @@
-clear
+function fig = plot_trials_summary(para, trial_data_session)
+% Accepts trial-level data obtained via get_trial_data and outputs plots
+% summarising bias and accuracy variation across trials within a session.
+    %% plot params
+    titleFontSize=16;
+    accuracy_ylims = [0.2 1];
+    choice_ylims = [0 1];
+    
+    plot_against_time = false;
+    plot_aborted_trials = false;
+    w=10; % maybe make this an optional argument?
 
-para = CONFIG;
-Animal_ID = '98';
-
-filelist = dir(fullfile(para.output_folder, 'intermediate_variables', Animal_ID, '*trial_data.csv'));
-
-% plot params
-titleFontSize=16;
-faceAlpha = 0.15;
-accuracy_ylims = [0.2 1];
-choice_ylims = [0 1];
-
-plot_against_time = false;
-plot_aborted_trials = false;
-w=10; 
-
-for sessionNum=1:length(filelist)
-
-%% get plot variables
-
-trial_data_session = read_trial_data(fullfile(filelist(sessionNum).folder, filelist(sessionNum).name));
-Session_ID = trial_data_session.Session_ID(1,:);
-
-output_folder = fullfile(para.output_folder, 'plot_performance_across_trials', Animal_ID);
-filename = strcat('plot_trial_bias_accuracy_', Animal_ID, '_', Session_ID);
-
-if ~isfile(fullfile(output_folder, strcat(filename, '.png')))
-    %trial_data_session(trial_data_session.AbortTrial==1,:) = [];
-
-    disp(strcat("Plotting session ", Session_ID, " ..."));
+%% extract plot variables
+    
+    Session_ID = trial_data_session.Session_ID(1,:);
+    Animal_ID = trial_data_session.Animal_ID(1,:);
 
     correctTrial = double(trial_data_session.CorrectTrial);
     correctCompletedTrial = correctTrial; 
@@ -55,7 +40,8 @@ if ~isfile(fullfile(output_folder, strcat(filename, '.png')))
     end
     
     %% plot local accuracy and choice bias
-    
+    disp(strcat("Plotting session ", Session_ID, " ..."));
+
     fig = figure('Visible','on', 'Position', [278 79 928 883]);
     tl = tiledlayout(2,1);
     tl.Padding = "compact";
@@ -85,13 +71,8 @@ if ~isfile(fullfile(output_folder, strcat(filename, '.png')))
         ylim(choice_ylims)
         xlim([min(x) max(x)]);
         ylabel('Choice Ratio Port 1 / Port 0', "FontSize",titleFontSize);
-    
-    % save plot
-    save_figure(fig, output_folder, filename);
-    close
+
     disp("Done.")
-else
-    disp(strcat("Skipping ", Session_ID, " session plot as it already exists."))
-end
+    
 
 end
