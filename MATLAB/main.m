@@ -10,8 +10,6 @@ Animal_ID = '98';
 
 % get list of files containing session-level behavioural data for each mouse
 filelist_behaviour = dir(fullfile(para.input_folder, Animal_ID,'**', '*experimental-data.csv'));
-sessionlist_behaviour = arrayfun(@(x) extractBetween(x.folder, ...
-    strcat(Animal_ID, filesep), filesep),filelist_behaviour); %<-- find a cleaner way of adding this (perhaps add to trial summary)?
 
 % concatenate within-session data from all sessions for animal
 trial_data_mouse = table();
@@ -39,23 +37,10 @@ for sessionNum=1:length(filelist_behaviour)
 end
 %% summarise session-level information
 
-% 1 behavioural data session summary
-sessions_summary_behaviour = get_session_summary_behaviour(trial_data_mouse);
+% behavioural data summary and ephys metadata for each session
+sessions_summary = get_session_summary(trial_data_mouse);
 
-% 2 ephys data session summary
-    
-% 2.1 get list of ephys metadata files for animal ID and corresponding session
-    % folder
-filelist_ephys = dir(fullfile(para.input_folder, Animal_ID,'**', '*settings.xml'));
-% 2.2 summarise meta-data from every file in filelist_ephys
-sessions_summary_ephys = get_session_summary_ephys(Animal_ID, filelist_ephys);
-
-% 3 combine behaviour and ephys session summaries
-sessions_summary_behaviour.session_folder = sessionlist_behaviour;
-sessions_summary=outerjoin(sessions_summary_behaviour, sessions_summary_ephys, ...
-    'Keys', 'session_folder', 'MergeKeys',true);
-
-% 4 save to local directory
+% save to local directory
 writetable(sessions_summary, fullfile(para.output_folder, 'intermediate_variables', ...
     strcat('session_summary_', Animal_ID, '.csv')));
 
@@ -68,7 +53,8 @@ save_figure(fig, output_folder, filename);
 
 %% plot trial summary information (within each session)
 
-filelist = dir(fullfile(para.output_folder, 'intermediate_variables', Animal_ID, '*trial_data.csv'));
+filelist = dir(fullfile(para.output_folder, 'intermediate_variables', ...
+    Animal_ID, '*trial_data.csv'));
 
 % loop through all session with local trial-level data saved
 for sessionNum=1:length(filelist)

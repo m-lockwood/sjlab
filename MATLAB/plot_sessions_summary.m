@@ -29,7 +29,7 @@ function fig = plot_sessions_summary(para, sessions_summary)
         x = x';
     end
 
-    ephys_data_available = ~(sessions_summary.Shanks=="");
+    ephys_data_available = ~(sessions_summary.electrodeConfiguration=="");
 
     %% plot accuracy of all non-aborted trials
     ax1 = nexttile;

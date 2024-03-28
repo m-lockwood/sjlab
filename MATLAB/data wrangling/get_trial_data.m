@@ -17,6 +17,12 @@ function trial_data = get_trial_data(session_data_filepath)
     Session_ID = get_session_ID(session_data_filepath);
     trial_data.Session_ID = repmat(cellstr(Session_ID), height(trial_data), 1);
 
+    % add session filepath
+    %[session_folder_ceph,~,~] = extractBetween(session_data_filepath);
+    session_folder_ceph = extractBetween(session_data_filepath, strcat(Animal_ID, filesep), filesep); 
+    session_folder_ceph = strcat(extractBefore(session_data_filepath, session_folder_ceph), session_folder_ceph);
+    trial_data.session_folder_ceph = repmat(cellstr(session_folder_ceph), height(trial_data),1);
+
     % Extract logical value for whether trial was correct
     trial_data.CorrectTrial = cellfun(@(x) strcmp(x(1:end-1),'RewardedNosepoke'), trial_data.TrialCompletionCode);
     trial_data.AbortTrial = cellfun(@(x) strcmp(x(1:end-2),'AbortedTrial'), trial_data.TrialCompletionCode);
@@ -35,6 +41,7 @@ function trial_data = get_trial_data(session_data_filepath)
     % reorder variables
     trial_data = movevars(trial_data,"Animal_ID",'before',"TrialNumber");
     trial_data = movevars(trial_data,"Session_ID",'before',"TrialNumber");
+    trial_data = movevars(trial_data, "session_folder_ceph", 'before', "TrialNumber");
     trial_data = movevars(trial_data,"ChoicePort",'After',"TrialCompletionCode");
     trial_data = movevars(trial_data,"AbortTrial",'After',"TrialCompletionCode");
     trial_data = movevars(trial_data,"CorrectTrial",'After',"TrialCompletionCode");

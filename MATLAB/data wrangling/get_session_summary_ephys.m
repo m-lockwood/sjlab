@@ -1,5 +1,7 @@
 function session_summary_ephys = get_session_summary_ephys(Animal_ID, filelist)
 
+    filelist_ephys = dir(fullfile(para.input_folder, Animal_ID,'**', '*settings.xml'));
+
     variableNames = {'session_folder', 'Shanks', 'Reference'};
     variableTypes = {'cell', 'cell', 'cell'};
     
@@ -8,7 +10,6 @@ function session_summary_ephys = get_session_summary_ephys(Animal_ID, filelist)
     
     for sessionNum = 1:length(filelist)
         filelist(sessionNum).folder
-        sessionNum
         session_folder = extractBetween(filelist(sessionNum).folder, strcat(Animal_ID,filesep), filesep);
         settings = xml2struct(fullfile(filelist(sessionNum).folder, filelist(sessionNum).name));
         signal_chain = settings.SETTINGS.SIGNALCHAIN;
