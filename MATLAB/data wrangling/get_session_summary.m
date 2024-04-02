@@ -22,6 +22,8 @@ function session_summary = get_session_summary(trial_data_mouse)
     session_summary.accuracy_completed_trials_bpci = get_bpci(session_summary.accuracy_completed_trials, session_summary.numTrialsCompleted);
     session_summary.choice_bias = splitapply(@(x) sum(x==1)/sum(~isnan(x)), trial_data_mouse.ChoicePort, sessionIdx);
     session_summary.choice_bias_bpci = get_bpci(session_summary.choice_bias, session_summary.numTrialsCompleted);
+    session_summary.mean_time_to_offset_dot = splitapply(@(x,y) mean(y-x), trial_data_mouse.DotOnsetTime, trial_data_mouse.DotOffsetTime, sessionIdx);
+    session_summary.mean_time_to_nosepoke = splitapply(@(x,y) mean(y-x), trial_data_mouse.DotOffsetTime, trial_data_mouse.NosepokeInTime, sessionIdx);
 
     % preindex ephys summary info
     session_summary.electrodeConfiguration = repmat(cellstr(""), height(session_summary),1);

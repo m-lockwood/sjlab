@@ -9,7 +9,7 @@ function fig = plot_sessions_summary(para, sessions_summary)
     
     %% configure plot layout
 
-    fig = figure('Visible','on', 'Position', [278 79 928 883]);
+    fig = figure('Visible','on', 'Position', [278 79 1260 883]);
     tl = tiledlayout(2,1);
     tl.Padding = "compact";
 
@@ -29,7 +29,8 @@ function fig = plot_sessions_summary(para, sessions_summary)
         x = x';
     end
 
-    ephys_data_available = ~(sessions_summary.electrodeConfiguration=="");
+    ephys_recording_1_96 = (sessions_summary.electrodeConfiguration=="All Shanks 1-96");
+    ephys_recording_97_192 = (sessions_summary.electrodeConfiguration=="All Shanks 97-192");
 
     %% plot accuracy of all non-aborted trials
     ax1 = nexttile;
@@ -39,7 +40,9 @@ function fig = plot_sessions_summary(para, sessions_summary)
             sessions_summary.accuracy_completed_trials_bpci, para.colour_accuracy, faceAlpha);
 
         pl3 = mark_condition(x,sessions_summary.accuracy_completed_trials, ...
-            ephys_data_available,para.colour_accuracy);
+            ephys_recording_1_96,para.colour_accuracy,'square',70);
+        pl4 = mark_condition(x,sessions_summary.accuracy_completed_trials, ...
+            ephys_recording_97_192,para.colour_accuracy,'o',50);
 
         pl2 = plot(x, sessions_summary.accuracy_all_trials, 'LineWidth', 2, 'Color', ...
             para.colour_accuracy, 'LineStyle','--');
@@ -48,8 +51,8 @@ function fig = plot_sessions_summary(para, sessions_summary)
         ylim(accuracy_ylims)
         xlim([min(x) max(x)]);
         ylabel('Fraction of Correct Trials', "FontSize",titleFontSize);
-        legend([pl1 pl2 pl3], {'Fraction of Completed Trials', 'Fraction of All Trials', ...
-            'Ephys Data Available'}, 'FontSize', titleFontSize, 'Location','southeast');
+        legend([pl1 pl2 pl3 pl4], {'Fraction of Completed Trials', 'Fraction of All Trials', ...
+            'Recording shanks 1-96', 'Recording shanks 97-192'}, 'FontSize', titleFontSize, 'Location','eastoutside');
     
     %% plot choice bias on all non-aborted trials (for which choice was port 0 or port 1)
     
