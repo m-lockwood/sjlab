@@ -9,7 +9,6 @@ function trial_data = read_trial_data(filepath)
     
     trial_data = readtable(filepath, opts);
     
-    % Convert CorrectTrial and AbortTrial variables to logicals
+    % Convert CorrectTrial to logicals
     trial_data.CorrectTrial = logical(trial_data.CorrectTrial);
-    trial_data.AbortTrial = logical(trial_data.AbortTrial);
 end

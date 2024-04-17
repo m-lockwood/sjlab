@@ -29,8 +29,11 @@ function fig = plot_sessions_summary(para, sessions_summary)
         x = x';
     end
 
-    ephys_recording_1_96 = (sessions_summary.electrodeConfiguration=="All Shanks 1-96");
-    ephys_recording_97_192 = (sessions_summary.electrodeConfiguration=="All Shanks 97-192");
+    ephys_recording_bank1 = (sessions_summary.electrodeConfiguration=="All Shanks 1-96");
+    ephys_recording_bank2 = (sessions_summary.electrodeConfiguration=="All Shanks 97-192");
+    ephys_recording_bank3 = (sessions_summary.electrodeConfiguration=="All Shanks 193-288");
+    ephys_recording_bank4 = (sessions_summary.electrodeConfiguration=="All Shanks 289-384");
+
 
     %% plot accuracy of all non-aborted trials
     ax1 = nexttile;
@@ -38,21 +41,27 @@ function fig = plot_sessions_summary(para, sessions_summary)
         title(ax1, 'Plot performance over sessions', 'FontSize',titleFontSize)
         pl1 = plot_shaded_error_bar(x, sessions_summary.accuracy_completed_trials, ...
             sessions_summary.accuracy_completed_trials_bpci, para.colour_accuracy, faceAlpha);
-
-        pl3 = mark_condition(x,sessions_summary.accuracy_completed_trials, ...
-            ephys_recording_1_96,para.colour_accuracy,'square',70);
-        pl4 = mark_condition(x,sessions_summary.accuracy_completed_trials, ...
-            ephys_recording_97_192,para.colour_accuracy,'o',50);
-
         pl2 = plot(x, sessions_summary.accuracy_all_trials, 'LineWidth', 2, 'Color', ...
             para.colour_accuracy, 'LineStyle','--');
         yline(0.5, '--', "LineWidth",1);
         yline(0.7, ':', "LineWidth",1);
+
+        % mark recording banks for sessions with ephys data
+        pl3 = mark_condition(x,sessions_summary.accuracy_completed_trials, ...
+            ephys_recording_bank1,para.colour_accuracy,'square',70);
+        pl4 = mark_condition(x,sessions_summary.accuracy_completed_trials, ...
+            ephys_recording_bank2,para.colour_accuracy,'o',50);
+        pl5 = mark_condition(x,sessions_summary.accuracy_completed_trials, ...
+            ephys_recording_bank3,para.colour_accuracy,'diamond',50);
+        pl6 = mark_condition(x,sessions_summary.accuracy_completed_trials, ...
+            ephys_recording_bank4,para.colour_accuracy,'^',50);
+
         ylim(accuracy_ylims)
         xlim([min(x) max(x)]);
         ylabel('Fraction of Correct Trials', "FontSize",titleFontSize);
-        legend([pl1 pl2 pl3 pl4], {'Fraction of Completed Trials', 'Fraction of All Trials', ...
-            'Recording shanks 1-96', 'Recording shanks 97-192'}, 'FontSize', titleFontSize, 'Location','eastoutside');
+        legend([pl1 pl2 pl3 pl4 pl5 pl6], {'Fraction of Completed Trials', 'Fraction of All Trials', ...
+            'Recording Bank 1', 'Recording Bank 2', 'Recording Bank 3', 'Recording Bank 4'}, ...
+            'FontSize', titleFontSize, 'Location','eastoutside');
     
     %% plot choice bias on all non-aborted trials (for which choice was port 0 or port 1)
     

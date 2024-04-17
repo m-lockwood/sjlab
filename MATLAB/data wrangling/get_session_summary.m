@@ -15,10 +15,11 @@ function session_summary = get_session_summary(trial_data_mouse)
     % get session summary stats
     session_summary.numTrials = splitapply(@(x) length(x), trial_data_mouse.CorrectTrial, sessionIdx);
     session_summary.numTrialsCompleted = splitapply(@(x) sum(~x), trial_data_mouse.AbortTrial, sessionIdx);
-    session_summary.abortTrialRate = splitapply(@(x) sum(x)/length(x), trial_data_mouse.AbortTrial, sessionIdx);
+    session_summary.abortNosepokeRate = splitapply(@(x) sum(x==1)/length(x), trial_data_mouse.AbortTrial, sessionIdx);
+    session_summary.abortDotOffsetRate = splitapply(@(x) sum(x==-1)/length(x), trial_data_mouse.AbortTrial, sessionIdx);
     session_summary.accuracy_all_trials = splitapply(@(x) sum(x)/sum(~isnan(x)), trial_data_mouse.CorrectTrial, sessionIdx);
     session_summary.accuracy_all_trials_bpci = get_bpci(session_summary.accuracy_all_trials, session_summary.numTrials);
-    session_summary.accuracy_completed_trials = splitapply(@(x,y) sum(x)/sum(~y), trial_data_mouse.CorrectTrial, trial_data_mouse.AbortTrial, sessionIdx);
+    session_summary.accuracy_completed_trials = splitapply(@(x,y) sum(x)/sum(~logical(y)), trial_data_mouse.CorrectTrial, trial_data_mouse.AbortTrial, sessionIdx);
     session_summary.accuracy_completed_trials_bpci = get_bpci(session_summary.accuracy_completed_trials, session_summary.numTrialsCompleted);
     session_summary.choice_bias = splitapply(@(x) sum(x==1)/sum(~isnan(x)), trial_data_mouse.ChoicePort, sessionIdx);
     session_summary.choice_bias_bpci = get_bpci(session_summary.choice_bias, session_summary.numTrialsCompleted);

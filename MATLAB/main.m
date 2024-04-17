@@ -4,7 +4,7 @@ clear
 
 %% CONFIG
 para = CONFIG;
-Animal_ID = '98';
+Animal_ID = '99';
 
 %% write intermediate variables and save locally
 
@@ -64,23 +64,12 @@ for sessionNum=1:length(filelist)
     % read trial-level information
     trial_data_session = read_trial_data(fullfile(filelist(sessionNum).folder, filelist(sessionNum).name));
     Session_ID = trial_data_session.Session_ID(1,:);
-    
-    % plot accuracy and choice bias
+
+    % plot accuracy, choice / abort trial bias, response times
     output_folder = fullfile(para.output_folder, 'plot_performance_across_trials', Animal_ID);
     filename = strcat('plot_trial_bias_accuracy_', Animal_ID, '_', Session_ID);
     if ~isfile(fullfile(output_folder, strcat(filename, '.png')))
         fig = plot_trials_summary(para, trial_data_session);
-        save_figure(fig, output_folder, filename);
-        close
-    else
-        disp(strcat("Skipping ", Session_ID, " session plot as it already exists."))
-    end
-
-    % plot accuracy, choice / abort trial bias, response times
-    output_folder = fullfile(para.output_folder, 'plot_performance_across_trials_v2', Animal_ID);
-    filename = strcat('plot_trial_bias_accuracy_v2_', Animal_ID, '_', Session_ID);
-    if ~isfile(fullfile(output_folder, strcat(filename, '.png')))
-        fig = plot_trials_summary_v2(para, trial_data_session);
         save_figure(fig, output_folder, filename);
         close
     else

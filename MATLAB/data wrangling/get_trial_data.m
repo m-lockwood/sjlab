@@ -25,12 +25,22 @@ function trial_data = get_trial_data(session_data_filepath)
 
     % Extract logical value for whether trial was correct
     trial_data.CorrectTrial = cellfun(@(x) strcmp(x(1:end-1),'RewardedNosepoke'), trial_data.TrialCompletionCode);
-    trial_data.AbortTrial = cellfun(@(x) strcmp(x(1:end-2),'AbortedTrial'), trial_data.TrialCompletionCode);
+
+    % mark aborted trials <-- old
+    %trial_data.AbortTrial = cellfun(@(x) strcmp(x(1:end-2),'AbortedTrial'), trial_data.TrialCompletionCode);
+
+    % MAKE DISTINCTION BETWEEN ABORTTRIALTYPES
+    % annotate aborted nosepokes with '1', aborted dot offsets with -1
+    AbortNosepoke = cellfun(@(x) strcmp(x(1:end-2),'AbortedTrial'), trial_data.TrialCompletionCode);
+    AbortDotOffset = cellfun(@(x) strcmp(x(1:end-2),'DotTimeLimitReached'), trial_data.TrialCompletionCode);
+    trial_data.AbortTrial = zeros(height(trial_data),1);
+    trial_data.AbortTrial(AbortNosepoke)=1;
+    trial_data.AbortTrial(AbortDotOffset)=-1;
 
     % Extract chosen port ID for all non-aborted trials
     trial_data.ChoicePort = cellfun(@(x) str2double(x(end)), trial_data.TrialCompletionCode);
     trial_data.AbortTrial(trial_data.ChoicePort==2)=1; % Flag trials for which port 2 as aborted trials
-    trial_data.ChoicePort(trial_data.AbortTrial)=nan; % Omit choice port for all aborted trials
+    trial_data.ChoicePort(logical(trial_data.AbortTrial))=nan; % Omit choice port for all aborted trials
 
     % Extract correct port ID
     CorrectPort = nan(height(trial_data),1);
