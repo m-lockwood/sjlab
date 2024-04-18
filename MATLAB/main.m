@@ -4,7 +4,7 @@ clear
 
 %% CONFIG
 para = CONFIG;
-Animal_ID = '99';
+Animal_ID = '104';
 
 %% write intermediate variables and save locally
 
@@ -40,7 +40,7 @@ end
 %% summarise session-level information
 
 % behavioural data summary and ephys metadata for each session
-sessions_summary = get_session_summary(trial_data_mouse);
+sessions_summary = get_session_summary(para,trial_data_mouse);
 
 % save to local directory
 writetable(sessions_summary, fullfile(para.output_folder, 'intermediate_variables', ...

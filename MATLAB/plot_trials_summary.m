@@ -60,6 +60,7 @@ function fig = plot_trials_summary(para, trial_data_session)
             para.colour_accuracy);
         pl2 = plot(x, accuracy_movmean_all_trials, 'LineWidth', 2, 'Color', ...
             para.colour_accuracy, 'LineStyle','--');
+        xline(para.num_trials_discard+1, '--');
         yline(0.5, '--', "LineWidth",1);
         ylim(accuracy_ylims)
         xlim([min(x) max(x)]);
@@ -73,6 +74,7 @@ function fig = plot_trials_summary(para, trial_data_session)
         pl1 = plot(x, choice_bias_movmean, 'color', para.colour_choice, 'LineWidth', 2);
         pl2 = plot(x, abort_trial_bias_movmean, 'color', para.colour_abortRate, 'LineWidth',2);
         pl3 = scatter(x, double(abortedTrialCue), 'MarkerEdgeColor',para.colour_abortRate, 'SizeData',50, 'Marker','o');
+        xline(para.num_trials_discard+1, '--');
         yline(0.5, ':', "LineWidth",1);
         ylim(choice_ylims)
         xlim([min(x) max(x)]);
@@ -84,6 +86,7 @@ function fig = plot_trials_summary(para, trial_data_session)
         title(ax3, strcat('Plot response time over sliding window, length m=', num2str(w)), 'FontSize',titleFontSize);
         pl1 = plot(x, time_to_dot_offset_movmean, 'color', [0.3010 0.7450 0.9330], 'LineWidth', 2);
         pl2 = plot(x, time_to_nosepoke_movmean, "Color", [0.4940 0.1840 0.5560], 'LineWidth',2);
+        xline(para.num_trials_discard+1, '--');
         xlim([min(x) max(x)]);
         ylabel('Time (s)', 'FontSize',titleFontSize);
         legend([pl1 pl2], {'Time taken from dot onset to offset', 'Time taken from dot offset to nosepoke'}, ...

@@ -1,4 +1,7 @@
-function session_summary = get_session_summary(trial_data_mouse)
+function session_summary = get_session_summary(para, trial_data_mouse)
+
+    % omit first n trials from analysis
+    trial_data_mouse = trial_data_mouse(trial_data_mouse.TrialNumber>para.num_trials_discard,:);
 
     % index rows corresponding to each session
     sessionIdx = findgroups(cellstr(trial_data_mouse.Session_ID));
