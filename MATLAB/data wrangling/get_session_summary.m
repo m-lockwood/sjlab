@@ -16,6 +16,7 @@ function session_summary = get_session_summary(para, trial_data_mouse)
     session_summary.AudioCueIdentities = splitapply(@(x) {unique(x)}, trial_data_mouse.AudioCueIdentity, sessionIdx);
     
     % get session summary stats
+    session_summary.sessionDuration_mins = splitapply(@(x,y) (y(end)-x(1))/60, trial_data_mouse.TrialStart, trial_data_mouse.TrialEnd, sessionIdx);
     session_summary.numTrials = splitapply(@(x) length(x), trial_data_mouse.CorrectTrial, sessionIdx);
     session_summary.numTrialsCompleted = splitapply(@(x) sum(~x), trial_data_mouse.AbortTrial, sessionIdx);
     session_summary.abortNosepokeRate = splitapply(@(x) sum(x==1)/length(x), trial_data_mouse.AbortTrial, sessionIdx);
