@@ -4,7 +4,7 @@ clear
 
 %% CONFIG
 para = CONFIG;
-Animal_ID = '98';
+Animal_ID = '104';
 
 %% write intermediate variables and save locally
 
@@ -44,7 +44,7 @@ sessions_summary = get_session_summary(para,trial_data_mouse);
 
 % save to local directory
 writetable(sessions_summary, fullfile(para.output_folder, 'intermediate_variables', ...
-    strcat('session_summary_', Animal_ID, '.csv')));
+    strcat('sessions_summary_', Animal_ID, '.csv')));
 
 %% plot session summary information
 
