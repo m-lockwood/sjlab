@@ -6,7 +6,12 @@ function fig = plot_sessions_summary(para, sessions_summary)
     faceAlpha = 0.15;
     accuracy_ylims = [0.2 1];
     choice_ylims = [0 1];
-    
+
+    % Get indeces of stage progressions
+    Stage = cell2mat(sessions_summary.Stage);
+    changeIdx = ~(Stage - [0;Stage(1:end-1)])==0;
+    changeIdx = find(changeIdx);
+
     %% configure plot layout
 
     fig = figure('Visible','on', 'Position', [278 79 1260 883]);
@@ -56,6 +61,12 @@ function fig = plot_sessions_summary(para, sessions_summary)
         pl6 = mark_condition(x,sessions_summary.accuracy_completed_trials, ...
             ephys_recording_bank4,para.colour_accuracy,'^',50);
 
+        % mark any stage progressions
+        for i = 1:length(changeIdx)
+            StageStr = strcat("Stage ",num2str(Stage(changeIdx(i))));
+            xline(changeIdx(i), '--', StageStr, 'FontSize',titleFontSize-4);
+        end
+
         ylim(accuracy_ylims)
         xlim([min(x) max(x)]);
         ylabel('Fraction of Correct Trials', "FontSize",titleFontSize);
@@ -70,7 +81,13 @@ function fig = plot_sessions_summary(para, sessions_summary)
         title(ax2, 'Plot choice bias over sessions', 'FontSize',titleFontSize);
         pl1 = plot_shaded_error_bar(x, sessions_summary.choice_bias, ...
             sessions_summary.choice_bias_bpci, para.colour_choice, faceAlpha);
-        %pl2 = plot(x, session_summary.abortTrialRate, 'LineWidth',2, 'Color',para.colour_abortRate);
+
+        % mark any stage progressions
+        for i = 1:length(changeIdx)
+            StageStr = strcat("Stage ",num2str(Stage(changeIdx(i))));
+            xline(changeIdx(i), '--', StageStr, 'FontSize',titleFontSize-4);
+        end
+        
         yline(0.5, '--', "LineWidth",1);
         ylim(choice_ylims)
         xlim([min(x) max(x)]);
