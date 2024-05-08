@@ -1,12 +1,13 @@
-function createChanMapFileFromXml(recording_folder)
+function createChanMapFileFromXml(recording_folder, filename)
+
+    include_sync_line=false;
+    stack_channels = false;
 
     %% get metadata from OpenEphys settings.xml file under 'recording_filepath'
     
     % Load metadata from OpenEphys output using 'xml2struct' from open ephys 
     % MATLAB tools (https://github.com/open-ephys/open-ephys-matlab-tools)
-    settings = xml2struct(fullfile(recording_folder, 'settings.xml')); % tion
-    
-    NP_probe_info = settings.SETTINGS.SIGNALCHAIN{1,1}.PROCESSOR{1,1}.EDITOR.NP_PROBE;
+    settings = xml2struct(fullfile(recording_folder, 'settings.xml')); 
     
     signal_chain = settings.SETTINGS.SIGNALCHAIN;
     
@@ -38,21 +39,44 @@ function createChanMapFileFromXml(recording_folder)
     
     % Make channel ID a variable
     T = rows2vars(T);
-    T.Properties.VariableNames = {'chanMap0ind', 'shankInd', 'xcoords', 'ycoords'};
+    T.Properties.VariableNames = {'chanMap0ind', 'shankInd', 'xcoords','ycoords'};
     
     % Convert channel ID to double
     T.chanMap0ind = cellfun(@(x) str2double(x(7:end)), T.chanMap0ind);
     
     % order rows by channel ID
     T = sortrows(T, "chanMap0ind"); 
+
+    if stack_channels
+        % reconfigure to vertically stack channels 
+        deltaY = max(T.ycoords) - min(T.ycoords);
+        T.ycoords(T.shankInd==1) = T.ycoords(T.shankInd==1)+deltaY+100;
+        T.ycoords(T.shankInd==2) = T.ycoords(T.shankInd==2)+deltaY+200;
+        T.ycoords(T.shankInd==3) = T.ycoords(T.shankInd==2)+deltaY+300;
     
-    % replicate variable structure from open ephys output (including 'dead'
-    % channel where sync line would be)
-    chanMap0ind = [T.chanMap0ind', T.chanMap0ind(end)+1];
-    chanMap = chanMap0ind+1;
-    shankInd = [T.shankInd; 1];
-    xcoords = [T.xcoords; 0];
-    ycoords = [T.ycoords; 0];
+        T.xcoords(T.xcoords==258)=8;
+        T.xcoords(T.xcoords==290)=40;
+        T.xcoords(T.xcoords==508)=8;
+        T.xcoords(T.xcoords==540)=40;
+        T.xcoords(T.xcoords==758)=8;
+        T.xcoords(T.xcoords==790)=40;
+    end
+
+    % replicate variable structure from open ephys output 
+    if include_sync_line % including 'dead' channel where sync line would be)
+        chanMap0ind = [T.chanMap0ind', T.chanMap0ind(end)+1];
+        chanMap = chanMap0ind+1;
+        shankInd = [T.shankInd; 1];
+        xcoords = [T.xcoords; 0];
+        ycoords = [T.ycoords; 0];
+    else
+        chanMap0ind = T.chanMap0ind';
+        chanMap = chanMap0ind+1;
+        shankInd = T.shankInd;
+        xcoords = T.xcoords;
+        ycoords = T.ycoords;
+    end
+
 
     
     %% get metadata constants constants 
@@ -62,7 +86,7 @@ function createChanMapFileFromXml(recording_folder)
     name = 'Npx2p0';
     connected = [true(length(chanMap)-1,1); false(1,1)];
     
-    save(fullfile(recording_folder, 'chanMap_Npx2p0_.mat'), 'connected', 'name', ...
+    save(fullfile(recording_folder, filename), 'connected', 'name', ...
         'fs', 'chanMap','chanMap0ind', 'shankInd', 'xcoords', 'ycoords');
 
 end
