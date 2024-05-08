@@ -69,12 +69,14 @@ function createChanMapFileFromXml(recording_folder, filename)
         shankInd = [T.shankInd; 1];
         xcoords = [T.xcoords; 0];
         ycoords = [T.ycoords; 0];
+        connected = [true(length(chanMap)-1,1); false(1,1)];
     else
         chanMap0ind = T.chanMap0ind';
         chanMap = chanMap0ind+1;
         shankInd = T.shankInd;
         xcoords = T.xcoords;
         ycoords = T.ycoords;
+        connected = true(length(chanMap),1);
     end
 
 
@@ -84,7 +86,6 @@ function createChanMapFileFromXml(recording_folder, filename)
     
     fs =30000;
     name = 'Npx2p0';
-    connected = [true(length(chanMap)-1,1); false(1,1)];
     
     save(fullfile(recording_folder, filename), 'connected', 'name', ...
         'fs', 'chanMap','chanMap0ind', 'shankInd', 'xcoords', 'ycoords');
