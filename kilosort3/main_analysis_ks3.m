@@ -1,4 +1,4 @@
-function main_analysis_ks3(session_filepath)
+function main_analysis_ks3(para, session_filepath)
 
     rootH = 'D:\'; % path to temporary binary file (same size as data, should be on fast SSD)
     pathToYourConfigFile = 'C:\Github\sjlab\kilosort3\configFiles'; 
@@ -20,7 +20,7 @@ function main_analysis_ks3(session_filepath)
     end
 
     % Create channel map file from settings.xml in recording_folder
-    createChanMapFileFromXml(recording_folder, chanMapFilename)
+    createChanMapFileFromXml(para, recording_folder)
 
     run(fullfile(pathToYourConfigFile, 'configFile384.m'))
     ops.fproc   = fullfile(rootH, 'temp_wh.dat'); % proc file on a fast SSD
@@ -57,7 +57,7 @@ function main_analysis_ks3(session_filepath)
     rez                = final_clustering(rez, tF, st3);
     rez                = find_merges(rez, 1);
     
-    session_filepath = fullfile(session_filepath, 'kilosort3');
+    session_filepath = fullfile(session_filepath, para.output_folder);
     mkdir(session_filepath)
     rezToPhy2(rez, session_filepath);
 
