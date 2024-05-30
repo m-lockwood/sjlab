@@ -1,4 +1,4 @@
-function createChanMapFileFromXml(recording_folder, filename)
+function createChanMapFileFromXml(para, recording_folder)
 
     include_sync_line=false;
     stack_channels = false;
@@ -47,7 +47,7 @@ function createChanMapFileFromXml(recording_folder, filename)
     % order rows by channel ID
     T = sortrows(T, "chanMap0ind"); 
 
-    if stack_channels
+    if para.stack_channels
         % reconfigure to vertically stack channels 
         deltaY = max(T.ycoords) - min(T.ycoords);
         T.ycoords(T.shankInd==1) = T.ycoords(T.shankInd==1)+deltaY+100;
@@ -63,7 +63,7 @@ function createChanMapFileFromXml(recording_folder, filename)
     end
 
     % replicate variable structure from open ephys output 
-    if include_sync_line % including 'dead' channel where sync line would be)
+    if para.include_sync_line % including 'dead' channel where sync line would be)
         chanMap0ind = [T.chanMap0ind', T.chanMap0ind(end)+1];
         chanMap = chanMap0ind+1;
         shankInd = [T.shankInd; 1];
@@ -87,7 +87,7 @@ function createChanMapFileFromXml(recording_folder, filename)
     fs =30000;
     name = 'Npx2p0';
     
-    save(fullfile(recording_folder, filename), 'connected', 'name', ...
+    save(fullfile(recording_folder, para.chanMap_filename), 'connected', 'name', ...
         'fs', 'chanMap','chanMap0ind', 'shankInd', 'xcoords', 'ycoords');
 
 end
