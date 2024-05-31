@@ -53,9 +53,6 @@ model = Model(
 )
 sound_reader = harp.create_reader(model, keep_type=True)
 
-# Read the harp soundcard stream, for the timestamps and audio ID
-all_sounds = sound_reader.PlaySoundOrFrequency.read(os.path.join(bin_s_path)
-all_sounds.reset_index(inplace=True)
 
 # Import behavioural data as data frame
 session_path = os.path.join(input_dir, animal_ID, session_ID)
@@ -74,17 +71,17 @@ first_dot_onset_time = df_trials['DotOnsetTime'].iloc[0]
 dot_times_ttl = hu.get_dot_times_from_ttl(ttl_state_df, first_dot_onset_time)
 df_trials = pd.concat([df_trials, dot_times_ttl], axis=1)
 
-# Get timestamp of all port choices within each trial
-port_choice = hu.get_port_choice(df_trials, behaviour_reader)
-df_trials = pd.concat([df_trials, port_choice], axis=1)
-
 # Get all pokes within each trial
 trial_pokes_df = hu.parse_trials_pokes(df_trials, behaviour_reader, ignore_dummy_port=True)
 df_trials = pd.concat([df_trials, trial_pokes_df], axis=1)
 
-# Get timestamp of all sound onsets and offsets within each trial
-all_sounds = hu.get_all_sounds(sound_reader, bin_s_path)
-#df_trials = pd.concat([df_trials, all_sounds], axis=1)
+# Get timestamp of all port choices within each trial
+port_choice = hu.get_port_choice(df_trials, behaviour_reader)
+df_trials = pd.concat([df_trials, port_choice], axis=1)
 
-# get timestamps of last instance of sound onset and offset in dot trial. 
-# (NOTE: In Stage 5, this will also be the only instance of sound onset/ offset.)
+# Get timestamp of all sound onsets and offsets within each trial
+trial_sounds_df = hu.get_all_sounds(df_trials, sound_reader, bin_s_path)
+df_trials = pd.concat([df_trials, trial_sounds_df], axis=1)
+
+# Save df_trials as pickle file
+df_trials.to_pickle(os.path.join(output_dir, animal_ID, session_ID + '_trial_data_harp.pkl'))
