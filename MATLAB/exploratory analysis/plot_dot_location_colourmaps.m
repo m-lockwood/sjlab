@@ -1,12 +1,13 @@
 clc
 close all
-clear
+
 
 %% CONFIG
 para = CONFIG;
 Animal_ID = '104';
 
-output_folder = 'C:\Users\megan\Documents\sjlab\flexible-navigation-task\exploratory_analysis\plot_dot_location_colourmaps';
+output_folder = ['C:\Users\megan\Documents\sjlab\flexible-navigation-task' ...
+    '\exploratory_analysis\plot_dot_location_colourmaps'];
 %% summarise session-level information
 
 % load metadata for each session
@@ -41,7 +42,8 @@ for sessionNum=1:height(sessions_summary)
     session_ID = sessions_summary.Session_ID(sessionNum);
     filename = strcat(Animal_ID, '_', session_ID{1,1}, '_trial_data.csv');
 
-    trial_data_session = read_trial_data(fullfile(trial_data_folder, filename));
+    trial_data_session = read_trial_data(fullfile(trial_data_folder, ...
+        filename));
 
     % concatenate across all sessions 
     trial_data_mouse = [trial_data_mouse; trial_data_session];
@@ -119,7 +121,8 @@ for i=1:height(dot_locations_summary)
     c = (a_max-dot_accuracy)*c2/(a_max-a_min) + (dot_accuracy-a_min)*c1/(a_max-a_min);
     %viscircles(center, radius, 'Color', c); can't figure out how to do
     %this filled...
-    scatter(centers(i,1), centers(i,2),'o', 'filled', 'MarkerFaceColor',c, 'MarkerEdgeColor','none', 'SizeData',250);
+    scatter(centers(i,1), centers(i,2),'o', 'filled', 'MarkerFaceColor',c, ...
+        'MarkerEdgeColor','none', 'SizeData',250);
 
 end
 
@@ -168,7 +171,8 @@ for i=1:height(dot_locations_summary)
     %viscircles(center, radius, 'Color', c); can't figure out how to do
     %this with filled circles... try Patch instead ? 
     %this filled...
-    scatter(centers(i,1), centers(i,2),'o', 'filled', 'MarkerFaceColor',c, 'MarkerEdgeColor','none', 'SizeData',250);
+    scatter(centers(i,1), centers(i,2),'o', 'filled', 'MarkerFaceColor',c, ...
+        'MarkerEdgeColor','none', 'SizeData',250);
 
 end
 

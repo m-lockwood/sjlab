@@ -4,7 +4,7 @@ clear
 
 %% CONFIG
 para = CONFIG;
-Animal_ID = 'FNT104';
+Animal_ID = 'FNT099';
 
 %% write intermediate variables and save locally
 
