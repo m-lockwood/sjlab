@@ -2,10 +2,11 @@ from kilosort import run_kilosort
 from kilosort import io
 import numpy as np
 import os
-import glob
 import spikeinterface.extractors as se
 from probeinterface import ProbeGroup, write_prb
-from probeinterface.plotting import plot_probe
+
+# import custom functions
+import spikeinterface_utils as su
 
 ###############################################################################
 animal_ID = 'FNT098'
@@ -13,7 +14,7 @@ session_ID = '2024-04-11T10-45-54'
 
 base_folder = r"Z:\projects\FlexiVexi\behavioural_data"
 session_folder = os.path.join(base_folder, animal_ID, session_ID)
-output_folder = os.path.join(session_folder, 'kilosort4')
+output_folder = os.path.join(session_folder, 'Kilosort4')
 
 ###############################################################################
 
@@ -24,18 +25,7 @@ fs = 30000
 ###############################################################################
 
 # Get path to Open-Ephys Record Node within session folder
-matching_files = glob.glob(os.path.join(session_folder, '**', 'settings.xml'), recursive=True)
-if matching_files:
-    # Get the first matching file
-    first_matching_file = matching_files[0]
-  
-    # Get the directory of the first matching file
-    path_to_recording = os.path.dirname(first_matching_file)
-else:
-    print("No 'settings.xml' file found in the specified path.")
-    
-# Get recording from open ephys
-recording = se.read_openephys(folder_path=path_to_recording, stream_name = 'Record Node 102#Neuropix-PXI-100.ProbeA')
+recording = su.get_raw_recording(session_folder)
 
 # get probe
 probe = recording.get_probe()

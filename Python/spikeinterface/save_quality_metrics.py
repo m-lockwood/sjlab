@@ -10,24 +10,34 @@ from pathlib import Path
 import os
 import glob
 
-############################################################################################################
-animal_ID = 'FNT099'
+#===========================================================================================================
+animal_ID = 'FNT098'
 base_folder_data = r"W:\projects\FlexiVexi\behavioural_data"
-base_folder_data_analysis = r"C:\Users\megan\Documents\sjlab\flexible-navigation-task\Data Analysis\v0p1p1"
-kilosort_subfolder = 'kilosort3_v3'
-qm_keystring = 'quality_metrics'
-sa_keystring = 'sorting_analyzer'
+base_folder_data_analysis = r"C:\Users\megan\Documents\sjlab\flexible-navigation-task\Data Analysis"
+kilosort_subfolder = 'Kilosort3'
+qm_keystring = 'quality_metrics_KS3'
+sa_keystring = 'sorting_analyzer_KS3'
 overwrite=False
-############################################################################################################
+#===========================================================================================================
 
 animal_folder = os.path.join(base_folder_data, animal_ID)
 sessionList = [d for d in os.listdir(animal_folder) 
                if os.path.isdir(os.path.join(animal_folder, d)) 
-               and glob.glob(os.path.join(animal_folder, d, '**',kilosort_subfolder, 'amplitudes.npy'), recursive=True)]
+               and glob.glob(os.path.join(animal_folder, d, '**',kilosort_subfolder,'**', 'amplitudes.npy'), recursive=True)]
 print(sessionList)
 
 # create empty metadata_all_sessions
-metadata_all_sessions = pd.DataFrame(columns=['session_ID', 'num_units', 'num_spikes_total', 'l_ratio_average', 'l_ratio_median', 'isolation_distance_average', 'isolation_distance_median', 'd_prime_average', 'd_prime_median'])
+metadata_all_sessions = pd.DataFrame(columns=[
+    'session_ID', 
+    'num_units', 
+    'num_spikes_total', 
+    'l_ratio_average', 
+    'l_ratio_median', 
+    'isolation_distance_average', 
+    'isolation_distance_median', 
+    'd_prime_average', 
+    'd_prime_median'
+])
 
 # Iterate through all sessions saving quality metrics as intermediate variables
 for session_ID in sessionList:
@@ -36,7 +46,7 @@ for session_ID in sessionList:
     output_folder = os.path.join(session_folder, 'spikeinterface')
 
     # Path to Kilosort3 output files within session folder
-    kilosort_folder = os.path.join(session_folder, kilosort_subfolder)
+    kilosort_folder = os.path.join(session_folder, kilosort_subfolder, 'sorter_output')
 
     # Get output from spike sorting using Kilosort3, keeping only good units
     sorting_KS = se.read_kilosort(folder_path=kilosort_folder,keep_good_only=True)
@@ -138,4 +148,4 @@ for session_ID in sessionList:
 output_folder_metadata = os.path.join(base_folder_data_analysis, 'ephys_signal_quality')
 if not os.path.exists(output_folder_metadata):
     os.makedirs(output_folder_metadata)
-metadata_all_sessions.to_csv(os.path.join(output_folder_metadata, 'ephys_signal_quality_metadata_' + animal_ID + '.csv'), index=False)
+metadata_all_sessions.to_csv(os.path.join(output_folder_metadata, qm_keystring + '_metadata_' + animal_ID + '.csv'), index=False)
