@@ -19,10 +19,11 @@ def get_raw_recording(session_folder, npx_stream_name = 'Record Node 102#Neuropi
 
         # Get the directory of the first matching file
         path_to_recording = os.path.dirname(first_matching_file)
+
+        # Get recording from open ephys
+        recording = se.read_openephys(folder_path=path_to_recording, stream_name = npx_stream_name)
     else:
         print("No 'settings.xml' file found in the specified path.")
-        
-    # Get recording from open ephys
-    recording = se.read_openephys(folder_path=path_to_recording, stream_name = npx_stream_name)
-
+        recording = None
+    
     return(recording)
