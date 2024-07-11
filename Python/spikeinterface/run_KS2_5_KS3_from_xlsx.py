@@ -1,4 +1,44 @@
-# Dependencies: spikeinterface, probeinterface, matplotlib, scipy
+"""
+run_KS2_5_KS3_from_xlsx.py
+
+Description:
+    This script is designed to automate the spike sorting process for neural data using Kilosort2.5 and Kilosort3 algorithms. 
+    It reads session data from an Excel file, performs preprocessing steps, and then runs the specified spike sorter on each session.
+
+Dependencies:
+    - spikeinterface: For handling spike sorting workflows.
+    - probeinterface: For probe information handling.
+    - matplotlib: For plotting and visualization.
+    - scipy: For scientific computing and technical computing.
+    - pandas: For data manipulation and analysis.
+    - os: For operating system dependent functionality.
+    - pathlib: For object-oriented filesystem paths.
+
+Usage:
+    Ensure all dependencies are installed and paths to Kilosort2.5 and Kilosort3 are correctly set.
+    Run the script in an environment where all dependencies are available.
+    The script expects a path to an Excel file containing session information under 'good_sessions_filepath'.
+
+Input:
+    An Excel file located at 'good_sessions_filepath' with at least the following columns:
+    - session_folder_ceph: Path to the session's data folder.
+
+Output:
+    The script will output the results of the spike sorting process for each session listed in the Excel file.
+    Results include sorted spike data and potentially figures or logs, depending on the configuration of the spike sorters.
+
+Author:
+    Megan Lockwood, Github @m-lockwood
+Date:
+    10.06.2024
+Version:
+    1.0
+
+Notes:
+    - This script is configured for Windows paths. Adjustments may be needed for other operating systems.
+    - Ensure that the paths to Kilosort2.5 and Kilosort3 are accessible and correctly set in the script.
+"""
+
 print('Run script for KS2.5 and KS3 spike sorting')
 from spikeinterface.preprocessing import phase_shift, bandpass_filter, common_reference
 from spikeinterface.sorters import run_sorter
@@ -11,7 +51,7 @@ from spikeinterface.sorters import Kilosort2_5Sorter
 # import custom functions
 import spikeinterface_utils as su
 
-##############################################################################################
+#=================================================================================================
 good_sessions_filepath = Path(
     r"W:/projects/FlexiVexi/Data Analysis/intermediate_variables/good_sessions.xlsx"
 )
@@ -21,7 +61,7 @@ good_sessions = pd.read_excel(good_sessions_filepath)
 Kilosort2_5Sorter.set_kilosort2_5_path(r"C:/Users/megan/Documents/GitHub/Kilosort25")
 Kilosort3Sorter.set_kilosort3_path(r"C:/Users/megan/Documents/GitHub/Kilosort3")
 
-##############################################################################################
+#=================================================================================================
 
 for session_idx, row in good_sessions.iterrows():
     print(f"Start analyzing session {session_idx+1} of {len(good_sessions)}: {row['session_folder_ceph']}...")
