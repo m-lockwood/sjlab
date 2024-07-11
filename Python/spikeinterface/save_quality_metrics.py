@@ -1,3 +1,52 @@
+"""
+save_quality_metrics.py
+
+Description:
+    This script is designed to give an overview of the quality of neuropixels data across 
+    sessions, calculated from the output from spike sorting in Kilosort. The script iterates 
+    through all sessions of a specified animal, extracting quality metrics for each session. 
+    The metrics include various statistical measures of spike sorting quality, such as L-ratio, 
+    isolation distance, and d-prime values. The results are saved for further analysis.
+
+Usage:
+    This script is intended to be run in a Python environment with the necessary dependencies 
+    installed. It requires manual setting of the animal ID, base data folders, and other 
+    configurations at the beginning of the script. If overwrite is set to 'false', the script 
+    will load existing quality metrics for the session (as a pandas dataframe), and sorting analyzer 
+    files.
+
+Dependencies:
+    - spikeinterface: For handling spike data and calculating quality metrics.
+    - numpy: For numerical operations.
+    - matplotlib: For plotting (if needed).
+    - pandas: For data manipulation and storage.
+    - pathlib and os: For file and directory operations.
+    - glob: For pattern matching in file paths.
+
+Configuration:
+    Before running the script, ensure the following variables are correctly set:
+    - animal_ID: The ID of the animal being analyzed.
+    - base_folder_data: The base folder where raw data is stored.
+    - base_folder_data_analysis: The folder where analysis results will be saved.
+    - kilosort_subfolder: The name of the subfolder containing Kilosort output.
+    - qm_keystring, sa_keystring: Keystrings for naming output files.
+    - overwrite: Whether to overwrite existing files, or load them if they exist.
+
+Output:
+    Key outputs:
+    - metadata_all_sessions: master CSV file with summary metrics for all sessions.
+    Intermediate variables:
+    - session_quality_metrics: A CSV file containing quality metrics for each unit in a session
+    - sorting_analyzer: The sorting analyzer object containing spike sorting information.
+
+Author:
+    Megan Lockwood, Github @m-lockwood
+Date:
+    12.06.2024
+Version:
+    1.0
+"""
+
 import spikeinterface.core as sc
 import spikeinterface.extractors as se
 import spikeinterface.qualitymetrics as sqm
@@ -23,7 +72,8 @@ overwrite=False
 animal_folder = os.path.join(base_folder_data, animal_ID)
 sessionList = [d for d in os.listdir(animal_folder) 
                if os.path.isdir(os.path.join(animal_folder, d)) 
-               and glob.glob(os.path.join(animal_folder, d, '**',kilosort_subfolder,'**', 'amplitudes.npy'), recursive=True)]
+               and glob.glob(os.path.join(animal_folder, d, '**',kilosort_subfolder,'**', 'amplitudes.npy'), 
+                             recursive=True)]
 print(sessionList)
 
 # create empty metadata_all_sessions
@@ -45,10 +95,10 @@ for session_ID in sessionList:
     session_folder = os.path.join(animal_folder, session_ID)
     output_folder = os.path.join(session_folder, 'spikeinterface')
 
-    # Path to Kilosort3 output files within session folder
+    # Path to Kilosort output files within session folder
     kilosort_folder = os.path.join(session_folder, kilosort_subfolder, 'sorter_output')
 
-    # Get output from spike sorting using Kilosort3, keeping only good units
+    # Get output from spike sorting using Kilosort, keeping only good units
     sorting_KS = se.read_kilosort(folder_path=kilosort_folder,keep_good_only=True)
     print(sorting_KS)
 
@@ -78,7 +128,7 @@ for session_ID in sessionList:
         
         # load qm from file
         filename_qm = qm_keystring+'_'+session_ID+'.csv'
-        qm = pd.read_csv(os.path.join(output_folder, filename_qm))
+        session_quality_metrics = pd.read_csv(os.path.join(output_folder, filename_qm))
         print('Loaded quality metrics from ' + os.path.join(output_folder, filename_qm) + '.')
 
     else:
@@ -102,13 +152,13 @@ for session_ID in sessionList:
 
         # depends on "waveforms", "templates", "noise_levels", and "pca" (if computing pca metrics)
         print('Computing quality metrics for ' + session_ID)
-        qm = sqm.compute_quality_metrics(sorting_analyzer, load_if_exists=None) 
+        session_quality_metrics = sqm.compute_quality_metrics(sorting_analyzer, load_if_exists=None) 
         
         # Save quality metrics to a .csv file
         filename_qm = qm_keystring+'_'+session_ID+'.csv'
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
-        qm.to_csv(os.path.join(output_folder, filename_qm))
+        session_quality_metrics.to_csv(os.path.join(output_folder, filename_qm))
 
     # append session meta-data to table
 
@@ -123,12 +173,12 @@ for session_ID in sessionList:
     num_spikes_total = sum(num_spikes_per_unit)
 
     ## get QM metadata
-    l_ratio_average = qm['l_ratio'].mean()
-    l_ratio_median = qm['l_ratio'].median()
-    isolation_distance_average = qm['isolation_distance'].mean()
-    isolation_distance_median = qm['isolation_distance'].median()
-    d_prime_average = qm['d_prime'].mean()
-    d_prime_median = qm['d_prime'].median()
+    l_ratio_average = session_quality_metrics['l_ratio'].mean()
+    l_ratio_median = session_quality_metrics['l_ratio'].median()
+    isolation_distance_average = session_quality_metrics['isolation_distance'].mean()
+    isolation_distance_median = session_quality_metrics['isolation_distance'].median()
+    d_prime_average = session_quality_metrics['d_prime'].mean()
+    d_prime_median = session_quality_metrics['d_prime'].median()
 
     # Append QM metadata to session metadata table
     metadata_session = pd.DataFrame({'session_ID': [session_ID],
