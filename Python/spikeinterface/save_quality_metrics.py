@@ -37,9 +37,32 @@ Configuration:
 
 Output:
     Key outputs:
-    - metadata_all_sessions: master CSV file with summary metrics for all sessions.
+    - metadata_all_sessions: master CSV file with summary metrics for all sessions., including:
+        - session_ID: The ID of the session.
+        - num_units: The number of units in the session.
+        - num_spikes_total: The total number of spikes in the session.
+        - l_ratio_average: The average L-ratio across units.
+        - l_ratio_median: The median L-ratio across units.
+        - isolation_distance_average: The average isolation distance across units.
+        - isolation_distance_median: The median isolation distance across units.
+        - d_prime_average: The average d-prime across units.
+        - d_prime_median: The median d-prime across units.
     Intermediate variables:
-    - session_quality_metrics: A CSV file containing quality metrics for each unit in a session
+    - session_quality_metrics: A CSV file containing quality metrics for each unit in a session, including:
+        - unit_id: The ID of the unit.
+        - num_spikes: The number of spikes in the unit.
+        - firing_rate: The firing rate of the unit.
+        - presence_ratio: The presence ratio of the unit.
+        - isi_violation: The ISI violation of the unit.
+        - amplitude_cutoff: The amplitude cutoff of the unit.
+        - snr: The signal-to-noise ratio of the unit.
+        - drift: The drift of the unit.
+        - max_drift: The maximum drift of the unit.
+        - cumulative_drift: The cumulative drift of the unit.
+        - silhouette_score: The silhouette score of the unit.
+        - isolation_distance: The isolation distance of the unit.
+        - l_ratio: The L-ratio of the unit.
+        - d_prime: The d-prime of the unit.
     - sorting_analyzer: The sorting analyzer object containing spike sorting information.
 
 Author:
