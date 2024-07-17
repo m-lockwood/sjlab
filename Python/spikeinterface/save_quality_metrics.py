@@ -11,9 +11,10 @@ Description:
 Usage:
     This script is intended to be run in a Python environment with the necessary dependencies 
     installed. It requires manual setting of the animal ID, base data folders, and other 
-    configurations at the beginning of the script. If overwrite is set to 'false', the script 
-    will load existing quality metrics for the session (as a pandas dataframe), and sorting analyzer 
-    files.
+    configurations in 'save_quality_metrics_config.yaml. If overwrite is set to 'false', the script 
+    will load any pre-existing sorting analyzer objects and quality metrics for the session. 
+        NOTE: the configuration file 'save_quality_metrics_config.yaml must be in the same directory 
+        as the script.
 
 Dependencies:
     - spikeinterface: For handling spike data and calculating quality metrics.
@@ -22,9 +23,11 @@ Dependencies:
     - pandas: For data manipulation and storage.
     - pathlib and os: For file and directory operations.
     - glob: For pattern matching in file paths.
+    - yaml: For reading configuration files.
 
 Configuration:
-    Before running the script, ensure the following variables are correctly set:
+    Before running the script, ensure the following variables are correctly set in the config 
+    file 'save_quality_metrics_config.yaml':
     - animal_ID: The ID of the animal being analyzed.
     - base_folder_data: The base folder where raw data is stored.
     - base_folder_data_analysis: The folder where analysis results will be saved.
@@ -58,15 +61,34 @@ import pandas as pd
 from pathlib import Path
 import os
 import glob
+import yaml
 
 #===========================================================================================================
-animal_ID = 'FNT098'
-base_folder_data = r"W:\projects\FlexiVexi\behavioural_data"
-base_folder_data_analysis = r"C:\Users\megan\Documents\sjlab\flexible-navigation-task\Data Analysis"
-kilosort_subfolder = 'Kilosort3'
-qm_keystring = 'quality_metrics_KS3'
-sa_keystring = 'sorting_analyzer_KS3'
-overwrite=False
+# Load parameters from config file
+#===========================================================================================================
+
+# Get the directory of the current script
+script_dir = Path(__file__).resolve().parent
+
+# Construct the path to the configuration file relative to the script's parent directory
+config_file_path = script_dir / 'save_quality_metrics_config.yaml'
+print(config_file_path)
+
+# Load the configuration file
+with open(config_file_path, 'r') as file:
+    config = yaml.safe_load(file)
+
+# Extract parameters set in config file
+animal_ID = config['animal_ID']
+base_folder_data = config['base_folder_data']
+base_folder_data_analysis = config['base_folder_data_analysis']
+kilosort_subfolder = config['kilosort_subfolder']
+qm_keystring = config['qm_keystring']
+sa_keystring = config['sa_keystring']
+overwrite = config['overwrite']
+
+#===========================================================================================================
+# Iterate through all sessions and save quality metrics
 #===========================================================================================================
 
 animal_folder = os.path.join(base_folder_data, animal_ID)

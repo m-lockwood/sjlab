@@ -1,0 +1,22 @@
+# Root directory for the project's behavioural data
+base_folder_data: "W:\\projects\\FlexiVexi\\behavioural_data"
+
+# Root directory for outputs from data analysis, e.g. quality metrics
+base_folder_data_analysis: "C:\\Users\\megan\\Documents\\sjlab\\flexible-navigation-task\\Data Analysis"
+
+# Identifier for the animal being analyzed
+animal_ID: "FNT098"
+
+# Key string specifying subfolder of Kilosort3 output to analyze
+kilosort_subfolder: "Kilosort3"
+
+# Key string to use in file name of quality metrics output files
+qm_keystring: "quality_metrics_KS3"
+
+# Key string to use in file name of sorting analyzer (saved as intermediate variable)
+sa_keystring: "sorting_analyzer_KS3"
+
+# Specify whether to overwrite existing variables:
+#   If False, sorting analyzers and quality metrics will be loaded for sessions where they already exist.
+#   If True, sorting analyzers and quality metrics will be recalculated and saved over any pre-existing files.
+overwrite: True
