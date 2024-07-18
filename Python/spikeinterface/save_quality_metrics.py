@@ -48,7 +48,8 @@ Output:
         - d_prime_average: The average d-prime across units.
         - d_prime_median: The median d-prime across units.
     Intermediate variables:
-    - session_quality_metrics: A CSV file containing quality metrics for each unit in a session, including:
+    - session_quality_metrics: A CSV file containing quality metrics for each unit in a session, 
+        including:
         - unit_id: The ID of the unit.
         - num_spikes: The number of spikes in the unit.
         - firing_rate: The firing rate of the unit.
@@ -63,7 +64,9 @@ Output:
         - isolation_distance: The isolation distance of the unit.
         - l_ratio: The L-ratio of the unit.
         - d_prime: The d-prime of the unit.
-    - sorting_analyzer: The sorting analyzer object containing spike sorting information.
+    - sorting_analyzer: The sorting analyzer object containing spike sorting information. Used as an 
+        intermediate variable for any subsequent analysis in spikeinterface. Saved under the session folder in 
+        the behavioral data repo under 'spikeinterface'.
 
 Author:
     Megan Lockwood, Github @m-lockwood
@@ -161,20 +164,24 @@ for session_ID in sessionList:
     # Get recording from open ephys
     recording = se.read_openephys(folder_path=path_to_recording, stream_name = 'Record Node 102#Neuropix-PXI-100.ProbeA')
 
+    #-----------------------------------------------------------------------------------------
     # Get Sorting Analyzer
+    #-----------------------------------------------------------------------------------------
 
-    output_folder = os.path.join(session_folder, 'spikeinterface')
+    output_folder_sa = os.path.join(session_folder, 'spikeinterface')
 
-    if os.path.exists(os.path.join(output_folder, sa_keystring)) and overwrite==False:
+    if os.path.exists(os.path.join(output_folder_sa, sa_keystring)) and overwrite==False:
 
         # load sorting analyzer from file
-        sorting_analyzer = sc.load_sorting_analyzer(folder=os.path.join(output_folder, sa_keystring))
-        print('Loaded Sorting Analyzer from ' + os.path.join(output_folder, sa_keystring) + '.')
+        sorting_analyzer = sc.load_sorting_analyzer(
+            folder=os.path.join(output_folder_sa, sa_keystring)
+        )
+        print('Loaded Sorting Analyzer from ' + os.path.join(output_folder_sa, sa_keystring) + '.')
         
         # load qm from file
         filename_qm = qm_keystring+'_'+session_ID+'.csv'
-        session_quality_metrics = pd.read_csv(os.path.join(output_folder, filename_qm))
-        print('Loaded quality metrics from ' + os.path.join(output_folder, filename_qm) + '.')
+        session_quality_metrics = pd.read_csv(os.path.join(output_folder_sa, filename_qm))
+        print('Loaded quality metrics from ' + os.path.join(output_folder_sa, filename_qm) + '.')
 
     else:
         print('Creating sorting analyzer for ' + session_ID)
@@ -193,24 +200,40 @@ for session_ID in sessionList:
         sorting_analyzer.get_extension('templates').get_data()
 
         # Save sorting analyzer to a .pkl file
-        sorting_analyzer = sorting_analyzer.save_as(format="binary_folder",folder=os.path.join(output_folder, sa_keystring)) 
+        sorting_analyzer = sorting_analyzer.save_as(
+            format="binary_folder", 
+            folder=os.path.join(output_folder, sa_keystring)
+        ) 
+
+    #-----------------------------------------------------------------------------------------
+    # Compute quality metrics for session
+    #-----------------------------------------------------------------------------------------
+
+    output_folder_qm = os.path.join(
+        base_folder_data_analysis, 'intermediate_variables', animal_ID
+    )
+    filename_qm = animal_ID + '_' + session_ID + '_' + qm_keystring + '.csv'
+
+    if os.path.exists(os.path.join(output_folder_qm, filename_qm)) and overwrite==False:
+
+        # load quality metrics from file
+        session_quality_metrics = pd.read_csv(os.path.join(output_folder_qm, filename_qm))
+        print('Loaded quality metrics from ' + os.path.join(output_folder_qm, filename_qm) + '.')
+
+    else:
 
         # depends on "waveforms", "templates", "noise_levels", and "pca" (if computing pca metrics)
         print('Computing quality metrics for ' + session_ID)
         session_quality_metrics = sqm.compute_quality_metrics(sorting_analyzer, load_if_exists=None) 
         
         # Save quality metrics to a .csv file
-        filename_qm = qm_keystring+'_'+session_ID+'.csv'
-        if not os.path.exists(output_folder):
+        if not os.path.exists(output_folder_qm):
             os.makedirs(output_folder)
-        session_quality_metrics.to_csv(os.path.join(output_folder, filename_qm))
+        session_quality_metrics.to_csv(os.path.join(output_folder_qm, filename_qm))
 
-    # append session meta-data to table
-
-    ## Get recording metadata
-    #num_channels = recording.get_num_channels()
-    #reference_channels = recording.get_reference_channels()
-    #channel_config = recording.get_channel_groups()
+    #-----------------------------------------------------------------------------------------
+    # Save meta-data for every session for animal_ID
+    #-----------------------------------------------------------------------------------------
 
     ## get sorting metadata
     num_units = se.KiloSortSortingExtractor.get_num_units(sorting_KS)
@@ -243,4 +266,8 @@ for session_ID in sessionList:
 output_folder_metadata = os.path.join(base_folder_data_analysis, 'ephys_signal_quality')
 if not os.path.exists(output_folder_metadata):
     os.makedirs(output_folder_metadata)
-metadata_all_sessions.to_csv(os.path.join(output_folder_metadata, qm_keystring + '_metadata_' + animal_ID + '.csv'), index=False)
+metadata_all_sessions.to_csv(
+    os.path.join(output_folder_metadata, qm_keystring + '_metadata_' + animal_ID + '.csv'
+    ), 
+    index=False
+)
