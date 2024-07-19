@@ -15,11 +15,17 @@ Usage:
     - This script is intended to run after a project has been created using 0_create_project.py
     - Check the project config.yaml file to ensure that the 'numframes2pick' parameter is set to the desired
         value.
+    - Set the following paramters in this script:
 
     Parameters
     ----------
+    root_dir:
+        The root path to the directory containing the project folder
 
-    crop:
+    project_name: 
+        The name of the project folder
+
+    crop: 
         (i) 'True', the cropping parameters [x1 x2 y1 y2] must be specified in the 
             corresponding config.yaml for each video.
             (NOTE: If no parameters have been specified for a given video, the code will run as normal
@@ -28,7 +34,7 @@ Usage:
         (iii) 'GUI', the user will be prompted to manually crop each video before the frames are extracted.
             (NOTE: This will not be possible when running this script from the cluster.)
 
-    userfeedback:
+    userfeedback: 
         (i) 'True', the user will be prompted on whether to extract frames on each session 
             in the videos directory for the specified DeepLabCut project.
         (ii) 'False', frames will be extracted from all videos in the videos directory without user input.
@@ -48,6 +54,18 @@ import os
 import deeplabcut
 from pathlib import Path
 
+#-------------------------------------------------------------#
+# CONFIG
+#-------------------------------------------------------------#
+
+root_dir = Path("W:\projects\FlexiVexi\deeplabcut_models")
+project_name = "flexible-navigation-task-ephys-Megan-2024-07-15"
+crop = True
+userfeedback = False
+
+#-------------------------------------------------------------#
+# Main Script
+#-------------------------------------------------------------#
 project_path = os.path.join(root_dir, project_name)
 video_dir = os.path.join(project_path, 'videos')
 
@@ -59,6 +77,6 @@ deeplabcut.extract_frames(
     config=config_path,
     mode='automatic',
     algo='kmeans',
-    crop=True,  # This enables manual cropping via the GUI
-    userfeedback=False
+    crop=crop,  # This enables manual cropping via the GUI
+    userfeedback=userfeedback
 )
