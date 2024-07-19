@@ -3,7 +3,7 @@ function para = CONFIG
     % directory params
     para.input_folder = 'W:\projects\FlexiVexi\behavioural_data';
     para.output_folder = 'C:\Users\megan\Documents\sjlab\flexible-navigation-task\Data Analysis';
-    Animal_ID_list = {'98', '99', '103', '104'};
+    para.Animal_ID = 'FNT104';
     
     % analysis params
     para.num_trials_discard = 15;
