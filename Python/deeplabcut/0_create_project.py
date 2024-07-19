@@ -52,6 +52,6 @@ config_path = deeplabcut.create_new_project(
     experimenter_name, 
     video_list, 
     working_directory=project_dir, 
-    copy_videos=False, 
+    copy_videos=True, 
     multianimal=False
 )
