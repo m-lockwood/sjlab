@@ -1,0 +1,17 @@
+# Kilosort version
+kilosort_version: 3
+
+# Identifier for the animal being analyzed
+animal_ID: "FNT098"
+
+# Path to Kilosort 2.5 repository
+Kilosort2_5_path: "C:\\Users\\megan\\Documents\\GitHub\\Kilosort25"
+
+# Path to Kilosort 3 repository
+Kilosort3_path: "C:\\Users\\megan\\Documents\\GitHub\\Kilosort3"
+
+# Path to base folder for behavioural and ephys data
+base_folder_data: "W:\\projects\\FlexiVexi\\behavioural_data"
+
+# File path to a .xlsx file with list of sessions to be analysed in 'run_kilosort_from_xlsx_file')
+sessions_list_filepath: "C:\\Users\\megan\\Documents\\sjlab\\flexible-navigation-task\\Data Analysis\\good_sessions.xlsx"
