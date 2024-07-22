@@ -11,6 +11,12 @@ Animal_ID = para.Animal_ID;
 % get list of files containing session-level behavioural data for each mouse
 filelist_behaviour = dir(fullfile(para.input_folder, Animal_ID,'**', '*experimental-data.csv'));
 
+% Filter out files starting with '._' to avoid unix metadata
+valid_files = ~startsWith({filelist_behaviour.name}, '._');
+
+% Use only valid files
+filelist_behaviour = filelist_behaviour(valid_files);
+
 % concatenate within-session data from all sessions for animal
 trial_data_mouse = table();
 
@@ -18,7 +24,7 @@ trial_data_mouse = table();
 for sessionNum=1:length(filelist_behaviour)
 
     session_data_filepath = fullfile(filelist_behaviour(sessionNum).folder, ...
-            filelist_behaviour(sessionNum).name);
+                filelist_behaviour(sessionNum).name);
     session_ID = get_session_ID(session_data_filepath);
 
     % output folder for session intermediate variables
