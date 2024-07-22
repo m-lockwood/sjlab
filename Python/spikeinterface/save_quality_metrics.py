@@ -177,11 +177,6 @@ for session_ID in sessionList:
             folder=os.path.join(output_folder_sa, sa_keystring)
         )
         print('Loaded Sorting Analyzer from ' + os.path.join(output_folder_sa, sa_keystring) + '.')
-        
-        # load qm from file
-        filename_qm = qm_keystring+'_'+session_ID+'.csv'
-        session_quality_metrics = pd.read_csv(os.path.join(output_folder_sa, filename_qm))
-        print('Loaded quality metrics from ' + os.path.join(output_folder_sa, filename_qm) + '.')
 
     else:
         print('Creating sorting analyzer for ' + session_ID)
