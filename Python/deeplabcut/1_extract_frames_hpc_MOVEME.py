@@ -54,24 +54,25 @@ import os
 import deeplabcut
 from pathlib import Path
 
-#=============================================================================#
+#-------------------------------------------------------------#
 # CONFIG
-#=============================================================================#
+#-------------------------------------------------------------#
 
-root_dir = Path("W:\projects\FlexiVexi\deeplabcut_models")
-project_name = "flexible-navigation-task-ephys-Megan-2024-07-15"
+root_dir = Path("ceph/sjones/projects/FlexiVexi/deeplabcut_models")
+project_name = "flexible-navigation-task-ephys-Megan-2024-07-15_ceph"
 crop = True
 userfeedback = False
 
-#=============================================================================#
+#-------------------------------------------------------------#
 # Main Script
-#=============================================================================#
-
+#-------------------------------------------------------------#
 project_path = os.path.join(root_dir, project_name)
 video_dir = os.path.join(project_path, 'videos')
 
 # Extract frames from videos in video_list
-config_path = os.path.join(project_path, 'config.yaml')
+# NOTE: when running from ceph cluster, the config path has the form 
+# 'project_name/config.yaml' (rather than 'root_dir/project_name/config.yaml').
+config_path = os.path.join(project_name, 'config.yaml')
 
 # Automatically extract frames from all videos in video_dir
 deeplabcut.extract_frames(
