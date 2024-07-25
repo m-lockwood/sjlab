@@ -18,8 +18,6 @@ Usage:
 
 Dependencies:
     - spikeinterface: For handling spike data and calculating quality metrics.
-    - numpy: For numerical operations.
-    - matplotlib: For plotting (if needed).
     - pandas: For data manipulation and storage.
     - pathlib and os: For file and directory operations.
     - glob: For pattern matching in file paths.
@@ -79,10 +77,7 @@ Version:
 import spikeinterface.core as sc
 import spikeinterface.extractors as se
 import spikeinterface.qualitymetrics as sqm
-import spikeinterface.widgets as sw
 
-import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 from pathlib import Path
 import os
@@ -244,7 +239,7 @@ for session_ID in sessionList:
     d_prime_median = session_quality_metrics['d_prime'].median()
 
     # Append QM metadata to session metadata table
-    metadata_session = pd.DataFrame({'session_ID': [session_ID],
+    metadata_session = pd.DataFrame({'Session_ID': [session_ID],
                                      'num_units': [num_units],
                                      'num_spikes_total': [num_spikes_total],
                                      'l_ratio_average': [l_ratio_average],
