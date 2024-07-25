@@ -58,10 +58,20 @@ from pathlib import Path
 # CONFIG
 #=============================================================================#
 
-root_dir = Path("W:\projects\FlexiVexi\deeplabcut_models")
-project_name = "flexible-navigation-task-ephys-Megan-2024-07-15"
-crop = True
-userfeedback = False
+# Get the directory of the current script
+script_dir = Path(__file__).resolve().parent
+
+# Open analysis config file
+config_path_analysis = os.path.join(script_dir, 'config_analysis.yaml')
+with open(config_path_analysis, 'r') as file:
+    config = yaml.safe_load(file)
+
+# Load config params
+root_dir = config['root_dir']
+project_name = config['project_name']
+config_path = config['config_path']
+crop = config['crop']
+userfeedback = config['userfeedback']
 
 #=============================================================================#
 # Main Script

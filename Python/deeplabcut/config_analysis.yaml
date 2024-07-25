@@ -1,0 +1,40 @@
+# config for running DeepLabCut analysis pipeline
+# NOTE: this is distinct from the project config file, specified in the config_name variable 
+
+#--------------------------------------------------------------------------------------------------#
+# DIRECTORY PARAMS
+#--------------------------------------------------------------------------------------------------#
+
+# root directory containing the project folder
+root_dir: "W:/projects/FlexiVexi/deeplabcut_models"
+
+# name of DeepLabCut project subdirectory
+project_name: "flexible-navigation-task-ephys-Megan-2024-07-15"
+
+# name of project config file
+config_path: "W:/projects/FlexiVexi/deeplabcut_models/flexible-navigation-task-ephys-Megan-2024-07-15/config.yaml"
+
+#--------------------------------------------------------------------------------------------------#
+# ANALYSIS PARAMS
+#--------------------------------------------------------------------------------------------------#
+
+# 1_extract_frames params
+crop: "GUI"
+userfeedback: False
+
+# 2_create_training_dataset params
+num_shuffles: 1
+net_type: 'resnet_50' 
+augmenter_type: imgaug'
+
+# 3_train_network params
+
+# 4_evaluate_network params
+
+# 5_analyze_videos params
+save_as_csv: True
+filter_predictions: True
+plot_trajectories: True
+videos_to_analyze:
+  - "W:/projects/FlexiVexi/deeplabcut_models/flexible-navigation-task-ephys-Megan-2024-07-15/videos/FNT099_2024-05-15T11-33-15_video.avi"
+  - "W:/projects/FlexiVexi/deeplabcut_models/flexible-navigation-task-ephys-Megan-2024-07-15/videos/FNT099_2024-05-16T09-45-06_video.avi"

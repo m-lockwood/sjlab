@@ -1,1 +1,4 @@
 MATLAB/CONFIG.m
+Python/spikeinterface/run_kilosort_config.yaml
+Python/spikeinterface/phy/recording.dat
+Python/spikeinterface/save_quality_metrics_config.yaml
