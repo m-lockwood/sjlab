@@ -22,7 +22,7 @@ for sessionNum=1:length(filelist_behaviour)
     session_ID = get_session_ID(session_data_filepath);
 
     % output folder for session intermediate variables
-    output_folder_session = fullfile(para.output_folder, 'intermediate_variables', Animal_ID);
+    output_folder_session = fullfile(para.output_folder, 'intermediate_variables', Animal_ID, session_ID);
     filename = strcat(Animal_ID, '_', session_ID, '_trial_data.csv');
 
     if ~isfile(fullfile(output_folder_session, filename))

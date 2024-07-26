@@ -200,7 +200,7 @@ for session_ID in sessionList:
     #-----------------------------------------------------------------------------------------
 
     output_folder_qm = os.path.join(
-        base_folder_data_analysis, 'intermediate_variables', animal_ID
+        base_folder_data_analysis, 'intermediate_variables', animal_ID, session_ID
     )
     filename_qm = animal_ID + '_' + session_ID + '_' + qm_keystring + '.csv'
 
