@@ -53,12 +53,15 @@ output_folder = fullfile(para.output_folder, 'plot_performance_across_sessions')
 filename = strcat('plot_session_bias_accuracy_', Animal_ID);
 save_figure(fig, output_folder, filename);
 
-%% plot changes in signal quality over time
-
-fig = plot_signal_quality_across_sessions(para, sessions_summary);
-output_folder = fullfile(para.output_folder, 'plot_data_quality_across_sessions');
-filename = strcat('plot_data_quality_', Animal_ID);
-save_figure(fig, output_folder, filename);
+%% plot changes in signal quality over time (if ephys signal quality metadata exists).
+if isfile(fullfile(para.output_folder, 'ephys_signal_quality', ['quality_metrics_KS3_metadata_', Animal_ID,'.csv']))
+    fig = plot_signal_quality_across_sessions(para, sessions_summary);
+    output_folder = fullfile(para.output_folder, 'plot_data_quality_across_sessions');
+    filename = strcat('plot_data_quality_', Animal_ID);
+    save_figure(fig, output_folder, filename);
+else
+    warning(strcat("No ephys metadata found for animal ", Animal_ID, ". Skipping plot of signal quality."))
+end
 
 %% plot trial summary information (within each session)
 
