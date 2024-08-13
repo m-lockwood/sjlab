@@ -1,30 +1,73 @@
 import pandas as pd
 import numpy as np
-import os
+
+# -----------------------------------------------------------------------------
+# General utils
+# -----------------------------------------------------------------------------
+
+# Retrieve trial start times based on either
+#  - audio cues (for stage 5), or
+#  - dot onset times (for stage 4)
+def get_trial_start_times(stage, **kwargs):
+
+    """
+    Retrieve trial start times based on the specified stage.
+
+    Parameters:
+    stage (int): The stage of the trial. Only stages 4 and 5 are supported.
+        - Stage 4: Requires 'dot_onset_times' in kwargs.
+        - Stage 5: Requires 'bin_sound_path' and 'sound_reader' in kwargs.
+    **kwargs: Additional keyword arguments required based on the stage.
+        - dot_onset_times (list or array-like): Onset times of dots for stage 4.
+        - bin_sound_path (str): Path to the binary sound file for stage 5.
+        - sound_reader (callable): Function to read the sound file for stage 5.
+
+    Returns:
+    pd.Series: A series of trial start times.
+
+    Raises:
+    ValueError: If required arguments for the specified stage are not provided or if an invalid stage is specified.
+
+    Notes:
+    - For stage 4, the function directly returns the provided 'dot_onset_times'.
+    - For stage 5, the function processes the sound events to derive trial start times.
+      It removes events for playing silence and considers the start of each audio cue as the trial start time.
+    - There might be a need to introduce a check for trials in stage 5 where the sound starts playing but the trial is not completed. In such cases, the last trial should be discarded.
+    """
+
+    if stage == 4:
+        dot_onset_times = kwargs.get('dot_onset_times')
+        if dot_onset_times is None:
+            raise ValueError("Stage 4 requires 'dot_onset_times' argument.")
+        # Process dot onset and offset times
+        trial_start_times = dot_onset_times
+        return trial_start_times
+
+    elif stage == 5:
+        bin_sound_path = kwargs.get('bin_sound_path')
+        sound_reader = kwargs.get('sound_reader')
+        if bin_sound_path is None or sound_reader is None:
+            raise ValueError("Stage 5 requires 'bin_sound_path' and 'sound_reader' arguments.")
+        # Derive the sound of all audio events
+        sound_of_all_audio_events = sound_reader(bin_sound_path)
+        print(f"Processing stage 5 with sound_of_all_audio_events: {sound_of_all_audio_events}")
+        all_sounds = hu.get_all_sounds(sound_reader, bin_sound_path)
+        # remove events for playing silence
+        all_sounds = all_sounds[all_sounds['PlaySoundOrFrequency'] != soundOffIdx]
+        # take trial start time is the start of each audio (since there is one audio cue per trial)
+        trial_start_times = all_sounds['timestamp']
+        # NOTE: might need to introduce a check for trials in stage 5 where the sound starts playing 
+        # but the trial is not completed. In this case we should discard the last trial.
+        return trial_start_times
+    else:
+        raise ValueError("Invalid stage. Only stages 4 and 5 are supported.")
 
 # -----------------------------------------------------------------------------
 # TTL utils
 # -----------------------------------------------------------------------------
 
-# Get dot onset and offset times given by TTL pulses
-def get_dot_times_from_ttl(df,t0):
-    
-    ## Find index of TTL timestamp closest to the first dot_onset_time in df_trials
-    idx = (np.abs(df['timestamp'] - t0)).idxmin()
-
-    ## Remove all TTL pulses that occur before the index found above
-    df = df.iloc[idx:]
-
-    ## Remove last rows such that df has a length that is a multiple of 6
-    n = len(df) % 6
-    df = df.iloc[:-n]
-    
-    dot_times_ttl = pd.DataFrame({
-        'DotOnsetTime_ttl': df['timestamp'].iloc[::6].tolist(),
-        'DotOffsetTime_ttl': df['timestamp'].iloc[2::6].tolist()
-    })
-    return(dot_times_ttl)
-
+# Get a data frame with timestamps of all instances of initiating and 
+# terminating a TTL pulse
 def get_ttl_state_df(behavior_reader):
 
   # Get data frame with timestamps of all instances of initiating TTL pulse
@@ -50,6 +93,26 @@ def get_ttl_state_df(behavior_reader):
     
     return ttl_state_df
 
+# Get dot onset and offset times given by TTL pulses
+def get_dot_times_from_ttl(behavior_reader,t0):
+    
+    ttl_state_df = get_ttl_state_df(behavior_reader)
+    ## Find index of TTL timestamp closest to the first dot_onset_time in df_trials
+    idx = (np.abs(ttl_state_df['timestamp'] - t0)).idxmin()
+
+    ## Remove all TTL pulses that occur before the index found above
+    ttl_state_df = ttl_state_df.iloc[idx:]
+
+    ## Remove last rows such that df has a length that is a multiple of 6
+    n = len(ttl_state_df) % 6
+    ttl_state_df = ttl_state_df.iloc[:-n]
+    
+    dot_times_ttl = pd.DataFrame({
+        'DotOnsetTime_ttl': ttl_state_df['timestamp'].iloc[::6].tolist(),
+        'DotOffsetTime_ttl': ttl_state_df['timestamp'].iloc[2::6].tolist()
+    })
+    return(dot_times_ttl)
+
 def get_square_wave(df): 
 
     # Create a new DataFrame with repeated elements
@@ -63,6 +126,10 @@ def get_square_wave(df):
 # Nose poke utils
 # -----------------------------------------------------------------------------
 
+# Get a data frame 'all_pokes' with the timestamp of all nosepoke events in the 
+# behavior harp stream. This includes the timestamps and IDs of entering and 
+# exiting a nose port, denoted by True and False, respectively.
+
 def get_all_pokes(behavior_reader, ignore_dummy_port=True):
 
     # Read the behavior harp stream, Digital Input states for the nosepoke 
@@ -75,105 +142,70 @@ def get_all_pokes(behavior_reader, ignore_dummy_port=True):
     else:
         all_pokes.drop(columns=['DIPort2'],inplace = True)
 
-    # reset index to get timestamps as a column   
-    all_pokes.reset_index(inplace=True)
-
     return all_pokes
 
-# Get first nose poke in response window of trial timestamped to harp clock
-def get_port_choice(df_trials, behavior_reader):
-    
-    # Get raw harp output containing all pokes in session
-    all_pokes = get_all_pokes(behavior_reader)
+# Get a data frame with information about port choice for each trial in trials_df.
+# This includes:
+# - Whether the trial was aborted
+# - The port choice (-1 in aborted trials)
+# - The timestamp of the first nosepoke (NaN in aborted trials)
+
+def get_port_choice(trials_df, behavior_reader, ignore_dummy_port=True):
+
+    all_pokes = get_all_pokes(behavior_reader, ignore_dummy_port=ignore_dummy_port)
 
     # Flag all trials for which 'TrialCompletionCode' contains the string 'Aborted' or 'DotTimeLimitReached' as aborted
-    AbortTrial = df_trials['TrialCompletionCode'].str.contains('Aborted|DotTimeLimitReached')
+    AbortTrial = trials_df['TrialCompletionCode'].str.contains('Aborted|DotTimeLimitReached')
     completed_trials = ~AbortTrial
 
     # Pre-index ChoicePort and NosepokeInTime_harp
-    ChoicePort = np.full(df_trials.shape[0],np.nan)
-    NosepokeInTime_harp = np.full(df_trials.shape[0],np.nan)
+    ChoicePort = np.full(trials_df.shape[0], -1, dtype=int)  # Initialize with -1 to represent aborted trials
+    NosepokeInTime_harp = np.full(trials_df.shape[0],np.nan)
 
     # Get timestamp of first nose poke in response window of non-aborted trials)
-    for t, row in df_trials.iterrows():
-
-        if completed_trials[t]: # Skip aborted trials
+    for trial, row in trials_df.iterrows():
+        if completed_trials[trial]: # Skip aborted trials
             # Define start of response window as dot offset time
-            response_window_start = row['DotOffsetTime_ttl']
+            response_window_start = row['DotOffsetTime_harp']
             
             # Define trial end as simultaneous with the start of the next trial
             # NOTE: # if last trial, take first response in 10s window after dot offset
-            if t == df_trials.shape[0]: 
-                trial_end = df_trials.loc[t, 'DotOnsetTime_ttl']+10
+            if trial == trials_df.shape[0]-1: 
+                trial_end = trials_df.loc[trial, 'DotOnsetTime_harp']+100
             else:
-                trial_end = df_trials.loc[t+1, 'DotOnsetTime_ttl'] 
+                trial_end = trials_df.loc[trial+1, 'DotOnsetTime_harp'] 
 
             # Get all pokes in each trial between start of response window and trial end
-            trial_pokes = all_pokes[(all_pokes.Time >= response_window_start) & (all_pokes.Time <= trial_end)]
+            trial_pokes = all_pokes[(all_pokes.index >= response_window_start) & (all_pokes.index <= trial_end)]
 
             if not trial_pokes.empty:
                 first_poke = trial_pokes.iloc[0]
                 # mark choice port row t with 0 = left, 1 = right)
-                ChoicePort[t] = (0 if first_poke['DIPort0'] else 1)
-                NosepokeInTime_harp[t] = first_poke.name
+                ChoicePort[trial] = (0 if first_poke['DIPort0'] else 1)
+                NosepokeInTime_harp[trial] = first_poke.name
             else:
-                Warning('No nosepoke detected in trial ' + str(t))
-                ChoicePort[t] = np.nan
-                NosepokeInTime_harp[t] = np.nan
+                Warning('No nosepoke detected in trial ' + str(trial))
+                ChoicePort[trial] = np.nan
+                NosepokeInTime_harp[trial] = np.nan
 
     # Convert numpy arrays to pandas Series
     AbortTrial = pd.Series(AbortTrial, name='AbortTrial')
     ChoicePort = pd.Series(ChoicePort, name='ChoicePort')
-    NosepokeInTime_harp = pd.Series(NosepokeInTime_harp, name='ChoiceTime_harp')
+    NosepokeInTime_harp = pd.Series(NosepokeInTime_harp, name='NosepokeInTime_harp')
 
-    df_choice = pd.concat([ChoicePort, NosepokeInTime_harp], axis=1)
-
-    return df_choice
-
-def parse_trial_pokes(df_trials, behavior_reader, ignore_dummy_port=True):
-
-    # Read the behavior harp stream, Digital Input states for the nosepoke timestamps and IDs.
-    all_pokes = get_all_pokes(behavior_reader, ignore_dummy_port=True)
-
-    # Create lists to store the poke IDs and timestamps for all trials
-    PokeON_S, PokeOFF_S, PokeID_S = [], [], []
-
-    # Iterate through trials (rows) and extract data from harp stream
-    for index, trial in df_trials.iterrows():
-
-        # Extract events that occur within the time range of this trial
-        trial_events=all_pokes[(all_pokes.Time >= trial.TrialStart) & (all_pokes.Time <= trial.TrialEnd)]
-
-        # Create trial lists for ll pokes this trial
-        PokeON, PokeOFF, PokeID = [], [], []
-        for _, poke in trial_events.iterrows():
-            event_time = poke.Time
-            if ignore_dummy_port:
-                poke = poke[['DIPort0','DIPort1']]
-            else:
-                poke = poke[['DIPort0','DIPort1','DIPort2']]
-
-            # find poke IDs from which column the timestamp is in. Only find ID for PokeOFFSET
-            if poke.any():
-                PokeON.append(event_time)
-                true_column_index = int(poke.idxmax()[-1]) # find which port
-            else:
-                PokeOFF.append(event_time)
-                PokeID.append(true_column_index) # should be safe unless the state of a nosepoke is already True at the start of a trial (shouldn't ever be true; ports should be initialised in low state)
-        PokeON_S.append(PokeON)
-        PokeOFF_S.append(PokeOFF)
-        PokeID_S.append(PokeID)
-
-    trial_pokes_df = pd.DataFrame({'NosepokeInTimes': PokeON_S, 'NosepokeOutTimes': PokeOFF_S, 'PokeID': PokeID_S}) # create dataframe from all nosepoke events
-    return trial_pokes_df
+    # Create data frame with port choice information
+    port_choice_df = pd.concat([AbortTrial, ChoicePort, NosepokeInTime_harp], axis=1)
+    
+    return port_choice_df
 
 # -----------------------------------------------------------------------------
 # Sound card utils
 # -----------------------------------------------------------------------------
-def get_all_sounds(sound_reader, bin_s_path):
+
+def get_all_sounds(sound_reader, bin_sound_path):
     
     # Read the harp sound card stream, for the timestamps and audio ID
-    all_sounds = sound_reader.PlaySoundOrFrequency.read(bin_s_path)
+    all_sounds = sound_reader.PlaySoundOrFrequency.read(bin_sound_path)
     all_sounds.reset_index(inplace=True)
 
     # Filter to only keep events (when sound actually happened, not write commands to the board) 
@@ -181,33 +213,39 @@ def get_all_sounds(sound_reader, bin_s_path):
 
     return all_sounds
 
-def parse_trial_sounds(df_trials, sound_reader, bin_s_path):
+def parse_trial_sounds(trials_df, sound_reader, bin_sound_path, OFF_index=18):
 
     # Read the harp sound card stream, for the timestamps and audio ID
-    all_sounds = get_all_sounds(sound_reader, bin_s_path)
+    all_sounds = get_all_sounds(sound_reader, bin_sound_path)
 
-    # Create lists to store the sound IDs and timestamps for all trials
-    SoundON_S, SoundOFF_S, SoundID_S = [], [], []
+     # Create lists to store the poke IDs and timestamps for all trials
+    ON_S, OFF_S, ID_S = [], [], []
 
     # Iterate through trials (rows) and extract data from harp stream
-    for index, trial in df_trials.iterrows():
+    for _, trial in trials_df.iterrows():
 
         # Extract events that occur within the time range of this trial
         trial_events=all_sounds[(all_sounds.Time >= trial.TrialStart) & (all_sounds.Time <= trial.TrialEnd)]
 
-        # Create trial lists for all sounds this trial
-        SoundON, SoundOFF, SoundID = [], [], []
+        # Create trial lists for sounds this trial
+        ON, OFF, ID = [], [], []
         for _, sound in trial_events.iterrows():
             event_time = sound.Time
-            sound_id = sound.PlaySoundOrFrequency
-            if sound_id == 0:
-                SoundOFF.append(event_time)
-            else:
-                SoundON.append(event_time)
-                SoundID.append(sound_id)
-        SoundON_S.append(SoundON)
-        SoundOFF_S.append(SoundOFF)
-        SoundID_S.append(SoundID)
+            sound = sound[['PlaySoundOrFrequency']]
+            sound = int(sound.iloc[0])
 
-    trial_sounds_df = pd.DataFrame({'SoundInTimes': SoundON_S, 'SoundOutTimes': SoundOFF_S, 'SoundID': SoundID_S}) # create dataframe from all sound events
+            # find audio IDs from the value. Only find ID for OFFSET
+            if sound != OFF_index:
+                ON.append(event_time)
+                ID.append(sound)
+
+            else:
+                OFF.append(event_time)
+
+        ON_S.append(ON)
+        OFF_S.append(OFF)
+        ID_S.append(ID)
+        
+    trial_sounds_df = pd.DataFrame({'AudioCueStart_harp': ON_S, 'AudioCueEnd_harp': OFF_S, 'AudioCueIdentity_harp': ID_S}) # create dataframe from all nosepoke events
+
     return trial_sounds_df
