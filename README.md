@@ -15,10 +15,9 @@ For a specified Animal ID:
 
 ### Python
 Pre-processing of ephys data, including:
-* spike sorting
-* Ephys data quality metrics
-* Alignment of ephys and harp timestamps
-
+* spike sorting (spikeinterface)
+* Ephys data quality metrics (spikeinterface)
+* Alignment of ephys and harp timestamps (harp, Open-Ephys)
 
 ### Installation
 
